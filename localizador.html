@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertiv MXL — Localizador de Activos</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="vertiv-logo.png" alt="Vertiv" class="brand-logo">
+    <div class="brand-divider"></div>
+    <div class="brand-text">
+      <span class="brand-name">Control de Activos y Equipos</span>
+      <span class="brand-sub">Planta Mexicali — MXL</span>
+    </div>
+  </a>
+  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+    <nav>
+      <ul class="navbar-nav">
+        <li><a href="index.html" class="nav-link">Entrega / Asignación</a></li>
+        <li><a href="devolucion.html" class="nav-link">Devolución / Recepción</a></li>
+        <li><a href="localizador.html" class="nav-link active">Localizador de Activo</a></li>
+      </ul>
+    </nav>
+    <div id="userNavBox" class="user-nav-box" style="display:none;">
+      <div class="user-nav-info">
+        <span class="user-nav-name" id="userNavName">Ing. Roberto Garza</span>
+        <span class="user-nav-role" id="userNavRole">Administrador TI</span>
+      </div>
+      <button type="button" class="btn-logout" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-title">Rastreo y Localización de Activos</div>
+  <div class="page-subtitle">Búsqueda inmediata de responsable y estatus por código de barras o número de serie</div>
+</div>
+
+<main class="container">
+
+  <!-- TARJETA BUSCADOR / ESCÁNER -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Búsqueda de Activo</h2>
+      <button type="button" class="btn btn-primary btn-sm" onclick="iniciarEscanerLocalizador()">
+        Activar Cámara
+      </button>
+    </div>
+    <div class="card-body">
+
+      <!-- VISOR CÁMARA CON ZOOM -->
+      <div id="scannerLocalizadorContainer" style="display:none; margin-bottom:16px;">
+        <div class="scanner-wrapper">
+          <div class="scanner-tip">
+            Mantenga la cámara a 12–18 cm del código. Utilice 2x o 3x para códigos pequeños.
+          </div>
+          <div class="scanner-video-area">
+            <div id="readerLocalizador"></div>
+            <div class="laser-line"></div>
+          </div>
+          <div class="scanner-controls">
+            <span class="scanner-controls-label">Zoom</span>
+            <button class="zoom-btn active" id="btnZoomLoc1" onclick="aplicarZoomLoc(1)">1×</button>
+            <button class="zoom-btn" id="btnZoomLoc2" onclick="aplicarZoomLoc(2)">2×</button>
+            <button class="zoom-btn" id="btnZoomLoc3" onclick="aplicarZoomLoc(3)">3×</button>
+            <button class="torch-btn" id="btnTorchLoc" onclick="toggleFlashLoc()">Flash</button>
+            <button class="close-scan-btn" onclick="detenerEscanerLocalizador()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- INGRESO MANUAL O PISTOLA LÁSER -->
+      <div class="form-group" style="margin-bottom:12px;">
+        <label class="form-label">Código de barras, Tag o Número de Serie</label>
+        <div class="input-group">
+          <input type="text" id="inputCodigoBuscar" class="form-control" placeholder="Escanear con lector USB o escribir código...">
+          <button class="btn btn-dark" onclick="buscarActivoDirecto()">Rastrear Equipo</button>
+        </div>
+      </div>
+
+      <!-- BOTONES DE CONSULTA RÁPIDA -->
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12px; color:var(--vertiv-gray-500); padding-top:4px;">
+        <span style="font-weight:600;">Consultas de demostración:</span>
+        <button class="btn btn-outline btn-xs" onclick="probarCodigo('VERTIV-LAP-042')">Laptop Dell (VERTIV-LAP-042)</button>
+        <button class="btn btn-outline btn-xs" onclick="probarCodigo('VERTIV-FLK-108')">Multímetro Fluke (VERTIV-FLK-108)</button>
+        <button class="btn btn-outline btn-xs" onclick="probarCodigo('VERTIV-RAD-015')">Radio Motorola (VERTIV-RAD-015)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADO DE LOCALIZACIÓN -->
+  <div id="resultadoActivoBox" style="display:none;"></div>
+
+</main>
+
+<footer class="footer">
+  <strong>Vertiv</strong> — Control de Activos y Equipos &nbsp;·&nbsp; Planta Mexicali (MXL) &nbsp;·&nbsp; © 2026
+</footer>
+
+<script src="db.js"></script>
+<script>
+  let html5QrCodeLoc = null;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('inputCodigoBuscar').addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        buscarActivoDirecto();
+      }
+    });
+  });
+
+  function reproducirBeep() {
+    try {
+      const c = new (window.AudioContext||window.webkitAudioContext)(), o=c.createOscillator(), g=c.createGain();
+      o.type='triangle'; o.frequency.setValueAtTime(1046,c.currentTime);
+      g.gain.setValueAtTime(0.15,c.currentTime);
+      o.connect(g); g.connect(c.destination);
+      o.start(); o.stop(c.currentTime+0.15);
+    } catch(e) {}
+  }
+
+  function probarCodigo(cod) {
+    document.getElementById('inputCodigoBuscar').value = cod;
+    buscarActivoDirecto();
+  }
+
+  function buscarActivoDirecto() {
+    const cod = document.getElementById('inputCodigoBuscar').value.trim();
+    if (!cod) {
+      alert('Por favor escanee o ingrese un código.');
+      return;
+    }
+    procesarBusqueda(cod);
+  }
+
+  function procesarBusqueda(codigo) {
+    const res = buscarActivoGlobal(codigo);
+    const box = document.getElementById('resultadoActivoBox');
+
+    if (!res) {
+      box.innerHTML = `
+        <div class="alert alert-warning" style="display:flex;">
+          <div>
+            <strong>Activo no asignado en resguardos vigentes</strong><br>
+            El código o serie <code>${codigo}</code> no está asignado a ningún colaborador en activo. Corresponde a <strong>Stock Disponible / Almacén General</strong>.
+          </div>
+        </div>`;
+      box.style.display = 'block';
+      return;
+    }
+
+    reproducirBeep();
+    const eq = res.equipo;
+    const asig = res.asignacion;
+    const estaDevuelto = eq.devuelto;
+
+    box.innerHTML = `
+      <div class="card" style="border-left: 4px solid ${estaDevuelto ? '#059669' : 'var(--vertiv-red)'};">
+        <div class="card-header">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="badge ${estaDevuelto ? 'badge-success' : 'badge-danger'}">
+              ${estaDevuelto ? 'DEVUELTO A PLANTA' : 'ASIGNADO EN RESGUARDO'}
+            </span>
+            <span style="font-weight:700; font-size:14px; color:var(--vertiv-dark);">${eq.descripcion}</span>
+          </div>
+          <span class="badge badge-gray">Folio: ${asig.folio}</span>
+        </div>
+        <div class="card-body">
+          <div class="grid-3" style="margin-bottom:14px;">
+            <div>
+              <div class="employee-field-label">Código / Tag</div>
+              <div class="employee-field-value"><code>${eq.codigo}</code></div>
+            </div>
+            <div>
+              <div class="employee-field-label">Categoría</div>
+              <div class="employee-field-value"><span class="badge badge-info">${eq.categoria}</span></div>
+            </div>
+            <div>
+              <div class="employee-field-label">Número de Serie</div>
+              <div class="employee-field-value">${eq.serie || 'S/N'}</div>
+            </div>
+          </div>
+
+          <div class="section-divider">Responsable Actual del Equipo</div>
+
+          <div class="employee-card" style="margin-top:8px;">
+            <div class="employee-card-grid">
+              <div>
+                <div class="employee-field-label">Colaborador Asignado</div>
+                <div class="employee-field-value">${asig.empleadoNombre}</div>
+              </div>
+              <div>
+                <div class="employee-field-label">N° de Nómina / ID</div>
+                <div class="employee-field-value">${asig.empleadoId}</div>
+              </div>
+              <div>
+                <div class="employee-field-label">Departamento</div>
+                <div class="employee-field-value">${asig.depto || 'Planta General'}</div>
+              </div>
+              <div>
+                <div class="employee-field-label">Fecha de Entrega</div>
+                <div class="employee-field-value">${asig.fechaEntrega || '—'}</div>
+              </div>
+              <div>
+                <div class="employee-field-label">Estado de Responsiva</div>
+                <div class="employee-field-value"><span class="badge ${asig.estado === 'ACTIVO' ? 'badge-warning' : 'badge-success'}">${asig.estado}</span></div>
+              </div>
+              <div>
+                <div class="employee-field-label">Acción de Devolución</div>
+                <div class="employee-field-value" style="margin-top:2px;">
+                  <a href="devolucion.html" class="btn btn-outline btn-xs" style="text-decoration:none;">Ir a Devolución</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    box.style.display = 'block';
+    window.scrollTo({ top: box.offsetTop - 70, behavior: 'smooth' });
+  }
+
+  // ESCÁNER
+  async function iniciarEscanerLocalizador() {
+    document.getElementById('scannerLocalizadorContainer').style.display = 'block';
+    if (html5QrCodeLoc) {
+      try { if (html5QrCodeLoc.isScanning) await html5QrCodeLoc.stop(); await html5QrCodeLoc.clear(); } catch(e) {}
+      html5QrCodeLoc = null;
+    }
+    html5QrCodeLoc = new Html5Qrcode("readerLocalizador", {
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.QR_CODE,  Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.UPC_A
+      ],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      verbose: false
+    });
+    const onOk = t => {
+      document.getElementById('inputCodigoBuscar').value = t;
+      detenerEscanerLocalizador();
+      procesarBusqueda(t);
+    };
+    const cfg = { fps: 15, qrbox: (w,h) => ({ width: Math.min(Math.floor(w*0.85),320), height: Math.min(Math.floor(h*0.55),180) }) };
+    try {
+      let cam = { facingMode: 'environment' };
+      try { const cams = await Html5Qrcode.getCameras(); if (cams.length) cam = (cams.find(c => /back|rear|trasera|0/i.test(c.label)) || cams[cams.length-1]).id; } catch(e) {}
+      await html5QrCodeLoc.start(cam, cfg, onOk);
+      try { const t = html5QrCodeLoc.getRunningTrackCameraCapabilities(); if (t && t.torchFeature().isSupported()) document.getElementById('btnTorchLoc').style.display = 'block'; } catch(e) {}
+    } catch(err) {
+      alert('No se pudo acceder a la cámara. Puede ingresar el código manualmente.');
+      detenerEscanerLocalizador();
+    }
+  }
+
+  async function detenerEscanerLocalizador() {
+    if (html5QrCodeLoc && html5QrCodeLoc.isScanning) try { await html5QrCodeLoc.stop(); } catch(e) {}
+    document.getElementById('scannerLocalizadorContainer').style.display = 'none';
+    document.getElementById('btnTorchLoc').style.display = 'none';
+  }
+
+  let torchLocOn = false;
+  async function toggleFlashLoc() {
+    if (!html5QrCodeLoc || !html5QrCodeLoc.isScanning) return;
+    try { torchLocOn = !torchLocOn; await html5QrCodeLoc.applyVideoConstraints({ advanced: [{ torch: torchLocOn }] }); document.getElementById('btnTorchLoc').classList.toggle('on', torchLocOn); } catch(e) {}
+  }
+
+  async function aplicarZoomLoc(n) {
+    ['btnZoomLoc1','btnZoomLoc2','btnZoomLoc3'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('btnZoomLoc'+n).classList.add('active');
+    if (!html5QrCodeLoc || !html5QrCodeLoc.isScanning) return;
+    try { await html5QrCodeLoc.applyVideoConstraints({ advanced: [{ zoom: n }] }); }
+    catch(e) { const v = document.querySelector('#readerLocalizador video'); if (v) { v.style.transform = `scale(${n})`; v.style.transformOrigin = 'center'; v.style.transition = 'transform .2s'; } }
+  }
+</script>
+</body>
+</html>

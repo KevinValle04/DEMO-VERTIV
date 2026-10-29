@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertiv MXL — Iniciar Sesión</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background-color: #0b0f17;
+      background-image: 
+        radial-gradient(at 100% 0%, rgba(208, 2, 27, 0.12) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(30, 41, 59, 0.3) 0px, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      margin: auto;
+    }
+
+    .login-card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .login-header {
+      background: #11141a;
+      padding: 30px 24px 24px;
+      text-align: center;
+      border-bottom: 2px solid var(--vertiv-red);
+    }
+
+    .login-logo {
+      height: 34px;
+      width: auto;
+      filter: invert(1) brightness(2);
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    .login-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.2px;
+    }
+
+    .login-subtitle {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .login-body {
+      padding: 28px 24px 24px;
+    }
+
+    .demo-pill-box {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--vertiv-border);
+    }
+
+    .demo-pill-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--slate-500);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .demo-roles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-demo-role {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      color: var(--slate-700);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      font-family: var(--font);
+    }
+
+    .btn-demo-role:hover {
+      background: var(--slate-100);
+      border-color: var(--slate-400);
+      color: var(--slate-900);
+    }
+
+    .login-footer-text {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11.5px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="vertiv-logo.png" alt="Vertiv" class="login-logo">
+      <div class="login-title">Control de Activos y Equipos</div>
+      <div class="login-subtitle">Planta Mexicali (MXL) — Gestión de Resguardos</div>
+    </div>
+
+    <div class="login-body">
+      <form id="formLogin" onsubmit="ejecutarLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="loginUser">Usuario / Correo Corporativo</label>
+          <input type="text" id="loginUser" class="form-control" value="admin.mxl@vertiv.com" required placeholder="ej. usuario@vertiv.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPass">Contraseña</label>
+          <input type="password" id="loginPass" class="form-control" value="vertiv2026" required placeholder="••••••••">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPlanta">Planta / Ubicación</label>
+          <select id="loginPlanta" class="form-select">
+            <option value="MXL-1">Vertiv Mexicali — Planta Principal (MXL)</option>
+            <option value="MXL-2">Vertiv Mexicali — Planta 2 (Almacén Central)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; height: 42px; margin-top: 6px; font-size: 14px;">
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <!-- ACCESO RÁPIDO PARA DEMO -->
+      <div class="demo-pill-box">
+        <div class="demo-pill-title">Accesos Rápidos de Demostración</div>
+        <div class="demo-roles-grid">
+          <button type="button" class="btn-demo-role" onclick="accesoRapido('Ing. Roberto Garza', 'Administrador TI')" style="border-left: 3px solid var(--vertiv-red);">
+            <strong>Administrador TI</strong><br>
+            <span style="font-size:10px; color:var(--slate-500); font-weight:normal;">Acceso total y emisión</span>
+          </button>
+          <button type="button" class="btn-demo-role" onclick="accesoRapido('Carlos Sánchez', 'Supervisor Almacén')" style="border-left: 3px solid #0284c7;">
+            <strong>Supervisor Almacén</strong><br>
+            <span style="font-size:10px; color:var(--slate-500); font-weight:normal;">Solo consulta y listados</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-footer-text">
+    Acceso restringido para personal autorizado de Vertiv Mexicali.<br>
+    Sesión protegida bajo directivas corporativas de TI &nbsp;·&nbsp; © 2026
+  </div>
+</div>
+
+<script>
+  function accesoRapido(nombre, rol) {
+    const sesion = {
+      nombre: nombre,
+      rol: rol,
+      correo: rol === 'Administrador TI' ? 'admin.mxl@vertiv.com' : 'almacen.mxl@vertiv.com',
+      planta: document.getElementById('loginPlanta').value,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('VERTIV_USER', JSON.stringify(sesion));
+    window.location.href = 'index.html';
+  }
+
+  function ejecutarLogin(e) {
+    e.preventDefault();
+    const user = document.getElementById('loginUser').value.trim();
+    const esSup = /supervisor|almacen|carlos/i.test(user);
+    const sesion = {
+      nombre: esSup ? 'Carlos Sánchez' : 'Ing. Roberto Garza',
+      rol: esSup ? 'Supervisor Almacén' : 'Administrador TI',
+      correo: user,
+      planta: document.getElementById('loginPlanta').value,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('VERTIV_USER', JSON.stringify(sesion));
+    window.location.href = 'index.html';
+  }
+</script>
+
+</body>
+</html>

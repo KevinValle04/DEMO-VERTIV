@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertiv MXL — Devolución y Recepción de Activos</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="vertiv-logo.png" alt="Vertiv" class="brand-logo">
+    <div class="brand-divider"></div>
+    <div class="brand-text">
+      <span class="brand-name">Control de Activos y Equipos</span>
+      <span class="brand-sub">Planta Mexicali — MXL</span>
+    </div>
+  </a>
+  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+    <nav>
+      <ul class="navbar-nav">
+        <li><a href="index.html" class="nav-link">Entrega / Asignación</a></li>
+        <li><a href="devolucion.html" class="nav-link active">Devolución / Recepción</a></li>
+        <li><a href="localizador.html" class="nav-link">Localizador de Activo</a></li>
+      </ul>
+    </nav>
+    <div id="userNavBox" class="user-nav-box" style="display:none;">
+      <div class="user-nav-info">
+        <span class="user-nav-name" id="userNavName">Ing. Roberto Garza</span>
+        <span class="user-nav-role" id="userNavRole">Administrador TI</span>
+      </div>
+      <button type="button" class="btn-logout" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-title">Devolución y Recepción de Activos</div>
+  <div class="page-subtitle">Seleccione al colaborador, escanee los activos devueltos y genere el pase de salida</div>
+</div>
+
+<main class="container">
+
+  <!-- BANNER SUPERVISOR DEVOLUCIÓN -->
+  <div id="bannerSupervisorDev" class="alert alert-info" style="display:none; margin-bottom:16px;">
+    <div>
+      <strong>Perfil Supervisor:</strong> Modo de consulta y supervisión de devoluciones. Puedes consultar el listado de colaboradores y el estado de sus equipos. La recepción física y cierre de resguardos corresponde al Administrador TI.
+    </div>
+  </div>
+
+  <!-- ALERTA -->
+  <div id="alertaDevolucion" class="alert alert-success" style="display:none;"></div>
+
+  <!-- BÚSQUEDA -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Localizar Responsiva Activa</h2>
+      <button type="button" class="btn btn-outline btn-sm" onclick="escanearGafeteDevolucion()">
+        Escanear Gafete
+      </button>
+    </div>
+    <div class="card-body">
+
+      <!-- VISOR DE GAFETE DEVOLUCIÓN -->
+      <div id="gafeteDevScannerBox" style="display:none; margin-bottom:14px;" class="scanner-wrapper">
+        <div class="scanner-tip">
+          Coloque el código de la credencial o gafete frente a la cámara
+        </div>
+        <div class="scanner-video-area">
+          <div id="readerGafeteDev"></div>
+        </div>
+        <div class="scanner-controls">
+          <button type="button" class="close-scan-btn" onclick="detenerEscanerGafeteDevolucion()">Cerrar</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="selectAsignacionActiva">Colaboradores con activos pendientes</label>
+          <select id="selectAsignacionActiva" class="form-select" onchange="cargarAsignacionPorFolio(this.value)">
+            <option value="">— Seleccionar colaborador —</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="inputBuscarNomina">Buscar por N° de nómina / ID</label>
+          <div class="input-group">
+            <input type="text" id="inputBuscarNomina" class="form-control" placeholder="Ej. V-1042">
+            <button class="btn btn-dark" onclick="buscarPorNominaManual()">Buscar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TARJETA DE COLABORADOR -->
+      <div id="resumenEmpleadoBox" class="employee-card" style="display:none;">
+        <div class="employee-card-grid">
+          <div>
+            <div class="employee-field-label">Colaborador</div>
+            <div class="employee-field-value" id="lblNombre">—</div>
+          </div>
+          <div>
+            <div class="employee-field-label">N° Nómina</div>
+            <div class="employee-field-value" id="lblNomina">—</div>
+          </div>
+          <div>
+            <div class="employee-field-label">Folio de Responsiva</div>
+            <div class="employee-field-value" id="lblFolio">—</div>
+          </div>
+          <div>
+            <div class="employee-field-label">Departamento</div>
+            <div class="employee-field-value" id="lblDepto">—</div>
+          </div>
+          <div>
+            <div class="employee-field-label">Fecha de Entrega</div>
+            <div class="employee-field-value" id="lblFechaEntrega">—</div>
+          </div>
+          <div>
+            <div class="employee-field-label">Avance de Devolución</div>
+            <div class="employee-field-value"><span id="lblProgreso" class="badge badge-warning">0 / 0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST DE ACTIVOS -->
+  <div class="card" id="cardChecklist" style="display:none;">
+    <div class="card-header">
+      <h2 class="card-title">Cotejo y Recepción de Activos</h2>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="iniciarEscanerDevolucion()">
+          Activar Cámara
+        </button>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          Subir Foto del Código
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="escanearDesdeArchivoDev(this)">
+        </label>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- VISOR CÁMARA DEVOLUCIÓN -->
+      <div id="scannerDevolucionContainer" style="display:none; margin-bottom:16px;">
+        <div class="scanner-wrapper">
+          <div class="scanner-tip">
+            Mantenga la cámara a 12–18 cm del código. Use 2x o 3x para códigos pequeños.
+          </div>
+          <div class="scanner-video-area">
+            <div id="readerDevolucion"></div>
+            <div class="laser-line"></div>
+          </div>
+          <div class="scanner-controls">
+            <span class="scanner-controls-label">Zoom</span>
+            <button class="zoom-btn active" id="btnZoomDev1" onclick="aplicarZoomDev(1)">1×</button>
+            <button class="zoom-btn" id="btnZoomDev2" onclick="aplicarZoomDev(2)">2×</button>
+            <button class="zoom-btn" id="btnZoomDev3" onclick="aplicarZoomDev(3)">3×</button>
+            <button class="torch-btn" id="btnTorchDev" onclick="toggleFlashDev()">Luz</button>
+            <button class="close-scan-btn" onclick="detenerEscanerDevolucion()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESCANEO MANUAL / USB -->
+      <div class="form-group">
+        <label class="form-label">Escaneo de activos (Pistola USB o ingreso manual)</label>
+        <div class="input-group">
+          <input type="text" id="inputCodigoDevolucion" class="form-control" placeholder="Escanee o escriba el código del activo a recibir...">
+          <button class="btn btn-dark" onclick="procesarCodigoDevolucionManual()">Verificar activo</button>
+        </div>
+        <div style="font-size:12px; color:var(--vertiv-gray-500); margin-top:5px;">
+          Al pistolear o confirmar el código, el sistema coteja la responsiva y lo marca como recibido.
+        </div>
+      </div>
+
+      <!-- TABLA DE DEVOLUCIÓN -->
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:120px;">Estado</th>
+              <th>Código / Tag</th>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              <th>N° Serie</th>
+              <th style="text-align:right; width:120px;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaDevolucionCuerpo"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CIERRE Y FIRMAS -->
+  <div class="card" id="cardCierre" style="display:none;">
+    <div class="card-header">
+      <h2 class="card-title">Cierre y Firma de Conformidad</h2>
+    </div>
+    <div class="card-body">
+
+      <!-- FOTO DE EVIDENCIA EN DEVOLUCIÓN -->
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Evidencia Fotográfica de Devolución / Daño (Opcional)</label>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <label class="btn btn-outline btn-sm" style="cursor:pointer; margin-bottom:0;">
+            Adjuntar Foto
+            <input type="file" id="inputFotoDevolucion" accept="image/*" capture="environment" style="display:none;" onchange="procesarFotoDevolucion(this)">
+          </label>
+          <div id="previewFotoDevolucionBox" style="display:none; align-items:center; gap:8px;">
+            <img id="imgPreviewDevolucion" src="" alt="Evidencia" style="width:48px; height:48px; object-fit:cover; border-radius:4px; border:1px solid var(--vertiv-border);">
+            <span style="font-size:12px; color:var(--vertiv-success-text); font-weight:600;">Foto adjunta</span>
+            <button type="button" class="btn btn-ghost btn-xs" onclick="eliminarFotoDevolucion()" style="color:var(--vertiv-danger-text)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="txtObservaciones">Observaciones / Estado del equipo recibido</label>
+        <textarea id="txtObservaciones" class="form-control" rows="2" placeholder="Ej. Todos los activos recibidos en buen estado operativo."></textarea>
+      </div>
+
+      <div class="grid-2" style="margin-top:6px;">
+        <div>
+          <label class="form-label" style="margin-bottom:8px;">Firma de quien recibe (Almacén / TI Vertiv)</label>
+          <div class="sig-box">
+            <canvas id="canvasFirmaReceptor" class="sig-canvas"></canvas>
+            <div class="sig-footer">
+              <span>Área receptora</span>
+              <button type="button" class="btn btn-ghost btn-xs" onclick="limpiarFirmaReceptor()">Limpiar</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="form-label" style="margin-bottom:8px;">Firma del colaborador (Pase de salida)</label>
+          <div class="sig-box">
+            <canvas id="canvasFirmaEmpleado" class="sig-canvas"></canvas>
+            <div class="sig-footer">
+              <span>Colaborador</span>
+              <button type="button" class="btn btn-ghost btn-xs" onclick="limpiarFirmaEmpleado()">Limpiar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-success" onclick="finalizarDevolucion()">Completar Devolución</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <strong>Vertiv</strong> — Control de Activos y Equipos &nbsp;·&nbsp; Planta Mexicali (MXL) &nbsp;·&nbsp; © 2026
+</footer>
+
+<script src="db.js"></script>
+<script>
+  let asignacionSeleccionada = null;
+  let html5QrCodeDev = null;
+  let canvasR, ctxR, canvasE, ctxE;
+  let fotoDevolucionBase64 = null;
+  let html5QrCodeGafeteDev = null;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    cargarAsignacionesActivas();
+    if (esSupervisor()) {
+      document.getElementById('bannerSupervisorDev').style.display = 'flex';
+      document.querySelector('.page-title').textContent = 'Supervisión de Devolución de Activos';
+      document.querySelector('.page-subtitle').textContent = 'Consulta y monitoreo de equipos pendientes por colaborador en planta';
+    }
+    document.getElementById('inputCodigoDevolucion').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); procesarCodigoDevolucionManual(); } });
+    document.getElementById('inputBuscarNomina').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); buscarPorNominaManual(); } });
+  });
+
+  function cargarAsignacionesActivas() {
+    const s = document.getElementById('selectAsignacionActiva');
+    s.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
+    obtenerAsignaciones()
+      .filter(a => a.estado === 'ACTIVO' || a.estado === 'DEVUELTO_PARCIAL')
+      .forEach(a => {
+        const o = document.createElement('option');
+        o.value = a.folio;
+        const pendientes = a.equipos.filter(e => !e.devuelto).length;
+        const etiqueta = a.estado === 'DEVUELTO_PARCIAL'
+          ? ` (Parcial: ${pendientes} pendiente${pendientes !== 1 ? 's' : ''})`
+          : ` (${a.equipos.length} activos)`;
+        o.textContent = `${a.empleadoId} — ${a.empleadoNombre} · ${a.folio}${etiqueta}`;
+        s.appendChild(o);
+      });
+  }
+
+  function cargarAsignacionPorFolio(folio) {
+    if (!folio) { ocultarDetalles(); return; }
+    const a = obtenerAsignaciones().find(x => x.folio === folio);
+    if (a) mostrarAsignacion(a);
+  }
+
+  function buscarPorNominaManual() {
+    const id = document.getElementById('inputBuscarNomina').value.trim();
+    if (!id) return;
+    const a = obtenerAsignaciones().find(x =>
+      x.empleadoId.trim().toUpperCase() === id.trim().toUpperCase() &&
+      (x.estado === 'ACTIVO' || x.estado === 'DEVUELTO_PARCIAL')
+    );
+    if (a) { document.getElementById('selectAsignacionActiva').value = a.folio; mostrarAsignacion(a); }
+    else alert('Sin responsiva activa para el ID: ' + id);
+  }
+
+  function mostrarAsignacion(a) {
+    asignacionSeleccionada = JSON.parse(JSON.stringify(a));
+    document.getElementById('lblNombre').textContent = a.empleadoNombre;
+    document.getElementById('lblNomina').textContent = a.empleadoId;
+    document.getElementById('lblFolio').textContent = a.folio;
+    document.getElementById('lblDepto').textContent = a.depto || '—';
+    document.getElementById('lblFechaEntrega').textContent = a.fechaEntrega || '—';
+    document.getElementById('resumenEmpleadoBox').style.display = 'block';
+    document.getElementById('cardChecklist').style.display = 'block';
+    document.getElementById('cardCierre').style.display = 'block';
+    
+    if (esSupervisor()) {
+      const scanBtns = document.querySelector('#cardChecklist .card-header div');
+      if (scanBtns) scanBtns.style.display = 'none';
+      const scanForm = document.querySelector('#cardChecklist .form-group');
+      if (scanForm) scanForm.style.display = 'none';
+      const formActions = document.querySelector('#cardCierre .form-actions');
+      if (formActions) {
+        formActions.innerHTML = '<div class="alert alert-warning" style="margin-bottom:0; width:100%;"><strong>Modo Consulta (Supervisor):</strong> La captura de firmas de conformidad y emisión del pase de salida oficial corresponden al Administrador TI.</div>';
+      }
+    }
+
+    requestAnimationFrame(() => {
+      configurarCanvases();
+    });
+    renderTabla();
+  }
+
+  function ocultarDetalles() {
+    asignacionSeleccionada = null;
+    document.getElementById('resumenEmpleadoBox').style.display = 'none';
+    document.getElementById('cardChecklist').style.display = 'none';
+    document.getElementById('cardCierre').style.display = 'none';
+  }
+
+  function renderTabla() {
+    if (!asignacionSeleccionada) return;
+    const tb = document.getElementById('tablaDevolucionCuerpo');
+    tb.innerHTML = '';
+    let devCount = 0;
+    const supervisor = esSupervisor();
+    asignacionSeleccionada.equipos.forEach((eq, i) => {
+      if (eq.devuelto) devCount++;
+      const tr = document.createElement('tr');
+      if (eq.devuelto) tr.classList.add('row-returned');
+      const accionTd = supervisor
+        ? '<span class="badge badge-gray" style="font-size:10px;">Consulta</span>'
+        : `<button class="btn btn-${eq.devuelto ? 'ghost' : 'success'} btn-xs" onclick="toggleDev(${i})">${eq.devuelto ? 'Deshacer' : 'Recibido'}</button>`;
+
+      tr.innerHTML = `
+        <td>${eq.devuelto
+          ? '<span class="badge badge-success">Devuelto</span>'
+          : '<span class="badge badge-warning">Pendiente</span>'}</td>
+        <td><code style="font-size:12px;color:var(--vertiv-gray-700)">${eq.codigo}</code></td>
+        <td><span class="badge badge-info">${eq.categoria}</span></td>
+        <td>${eq.descripcion}</td>
+        <td style="color:var(--vertiv-gray-500)">${eq.serie}</td>
+        <td style="text-align:right">
+          ${accionTd}
+        </td>`;
+      tb.appendChild(tr);
+    });
+    const total = asignacionSeleccionada.equipos.length;
+    const pendientes = total - devCount;
+    const prog = document.getElementById('lblProgreso');
+    prog.textContent = `${devCount} de ${total} devueltos`;
+    prog.className = devCount === total ? 'badge badge-success' : pendientes === total ? 'badge badge-warning' : 'badge badge-info';
+  }
+
+  function toggleDev(i) {
+    if (esSupervisor()) {
+      alert('Acción restringida: Solo el Administrador TI puede cotejar o marcar activos recibidos.');
+      return;
+    }
+    if (!asignacionSeleccionada) return;
+    asignacionSeleccionada.equipos[i].devuelto = !asignacionSeleccionada.equipos[i].devuelto;
+    renderTabla();
+  }
+
+  function reproducirBeep() {
+    try { const c = new (window.AudioContext||window.webkitAudioContext)(), o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.setValueAtTime(1046,c.currentTime); g.gain.setValueAtTime(0.15,c.currentTime); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+0.15); } catch(e) {}
+  }
+
+  function procesarCodigoDevuelto(codigo) {
+    if (!asignacionSeleccionada) { alert('Seleccione un colaborador primero.'); return; }
+    const eq = asignacionSeleccionada.equipos.find(e => e.codigo.trim().toUpperCase() === codigo.trim().toUpperCase());
+    if (eq) { reproducirBeep(); eq.devuelto = true; renderTabla(); }
+    else alert(`El código [${codigo}] no pertenece a la responsiva de este colaborador.`);
+  }
+
+  function procesarCodigoDevolucionManual() {
+    const inp = document.getElementById('inputCodigoDevolucion');
+    const c = inp.value.trim(); if (!c) return;
+    procesarCodigoDevuelto(c); inp.value = ''; inp.focus();
+  }
+
+  async function iniciarEscanerDevolucion() {
+    document.getElementById('scannerDevolucionContainer').style.display = 'block';
+    if (html5QrCodeDev) { try { if (html5QrCodeDev.isScanning) await html5QrCodeDev.stop(); await html5QrCodeDev.clear(); } catch(e) {} html5QrCodeDev = null; }
+    html5QrCodeDev = new Html5Qrcode("readerDevolucion", {
+      formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.UPC_A],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false
+    });
+    const onOk = t => { procesarCodigoDevuelto(t); detenerEscanerDevolucion(); };
+    const cfg = { fps: 15, qrbox: (w,h) => ({ width: Math.min(Math.floor(w*0.85),320), height: Math.min(Math.floor(h*0.55),180) }) };
+    try {
+      let cam = { facingMode: 'environment' };
+      try { const cams = await Html5Qrcode.getCameras(); if (cams.length) cam = (cams.find(c => /back|rear|trasera|0/i.test(c.label)) || cams[cams.length-1]).id; } catch(e) {}
+      await html5QrCodeDev.start(cam, cfg, onOk);
+      try { const t = html5QrCodeDev.getRunningTrackCameraCapabilities(); if (t && t.torchFeature().isSupported()) document.getElementById('btnTorchDev').style.display = 'block'; } catch(e) {}
+    } catch(err) {
+      alert('No se pudo iniciar la cámara.');
+      detenerEscanerDevolucion();
+    }
+  }
+
+  async function detenerEscanerDevolucion() {
+    if (html5QrCodeDev && html5QrCodeDev.isScanning) try { await html5QrCodeDev.stop(); } catch(e) {}
+    document.getElementById('scannerDevolucionContainer').style.display = 'none';
+    document.getElementById('btnTorchDev').style.display = 'none';
+    document.getElementById('btnTorchDev').classList.remove('on');
+  }
+
+  let torchDevOn = false;
+  async function toggleFlashDev() {
+    if (!html5QrCodeDev || !html5QrCodeDev.isScanning) return;
+    try { torchDevOn = !torchDevOn; await html5QrCodeDev.applyVideoConstraints({ advanced: [{ torch: torchDevOn }] }); document.getElementById('btnTorchDev').classList.toggle('on', torchDevOn); } catch(e) {}
+  }
+
+  async function aplicarZoomDev(n) {
+    ['btnZoomDev1','btnZoomDev2','btnZoomDev3'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('btnZoomDev'+n).classList.add('active');
+    if (!html5QrCodeDev || !html5QrCodeDev.isScanning) return;
+    try { await html5QrCodeDev.applyVideoConstraints({ advanced: [{ zoom: n }] }); }
+    catch(e) { const v = document.querySelector('#readerDevolucion video'); if (v) { v.style.transform = `scale(${n})`; v.style.transformOrigin = 'center'; v.style.transition = 'transform .2s'; } }
+  }
+
+  async function escanearDesdeArchivoDev(input) {
+    if (!input.files || !input.files[0]) return;
+    if (!html5QrCodeDev) html5QrCodeDev = new Html5Qrcode("readerDevolucion", { formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.UPC_A], experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
+    try { const t = await html5QrCodeDev.scanFile(input.files[0], true); procesarCodigoDevuelto(t); }
+    catch(e) { alert('No se pudo decodificar el código de la imagen.'); }
+    finally { input.value = ''; }
+  }
+
+  // ESCANEAR GAFETE EN DEVOLUCIÓN
+  async function escanearGafeteDevolucion() {
+    const box = document.getElementById('gafeteDevScannerBox');
+    box.style.display = 'block';
+
+    if (html5QrCodeGafeteDev) {
+      try { if (html5QrCodeGafeteDev.isScanning) await html5QrCodeGafeteDev.stop(); await html5QrCodeGafeteDev.clear(); } catch(e) {}
+      html5QrCodeGafeteDev = null;
+    }
+
+    html5QrCodeGafeteDev = new Html5Qrcode("readerGafeteDev", {
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.QR_CODE,  Html5QrcodeSupportedFormats.EAN_13
+      ],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      verbose: false
+    });
+
+    const onOk = (text) => {
+      reproducirBeep();
+      detenerEscanerGafeteDevolucion();
+      document.getElementById('inputBuscarNomina').value = text;
+      buscarPorNominaManual();
+    };
+
+    const cfg = { fps: 15, qrbox: { width: 280, height: 160 } };
+    try {
+      let cam = { facingMode: 'environment' };
+      try { const cams = await Html5Qrcode.getCameras(); if (cams.length) cam = (cams.find(c => /back|rear|trasera|0/i.test(c.label)) || cams[cams.length-1]).id; } catch(e) {}
+      await html5QrCodeGafeteDev.start(cam, cfg, onOk);
+    } catch(err) {
+      alert('No se pudo acceder a la cámara para lectura de credencial.');
+      detenerEscanerGafeteDevolucion();
+    }
+  }
+
+  async function detenerEscanerGafeteDevolucion() {
+    if (html5QrCodeGafeteDev && html5QrCodeGafeteDev.isScanning) {
+      try { await html5QrCodeGafeteDev.stop(); } catch(e) {}
+    }
+    document.getElementById('gafeteDevScannerBox').style.display = 'none';
+  }
+
+  // FOTO DE EVIDENCIA EN DEVOLUCIÓN
+  function procesarFotoDevolucion(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const c = document.createElement('canvas');
+        const max = 800;
+        let w = img.width, h = img.height;
+        if (w > max || h > max) {
+          if (w > h) { h = Math.round(h * max / w); w = max; }
+          else { w = Math.round(w * max / h); h = max; }
+        }
+        c.width = w; c.height = h;
+        const ctxImg = c.getContext('2d');
+        ctxImg.drawImage(img, 0, 0, w, h);
+        fotoDevolucionBase64 = c.toDataURL('image/jpeg', 0.7);
+        document.getElementById('imgPreviewDevolucion').src = fotoDevolucionBase64;
+        document.getElementById('previewFotoDevolucionBox').style.display = 'flex';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function eliminarFotoDevolucion() {
+    fotoDevolucionBase64 = null;
+    document.getElementById('inputFotoDevolucion').value = '';
+    document.getElementById('imgPreviewDevolucion').src = '';
+    document.getElementById('previewFotoDevolucionBox').style.display = 'none';
+  }
+
+  function configurarCanvases() {
+    canvasR = document.getElementById('canvasFirmaReceptor');
+    canvasE = document.getElementById('canvasFirmaEmpleado');
+    ctxR = setupSig(canvasR);
+    ctxE = setupSig(canvasE);
+  }
+
+  function setupSig(c) {
+    const ctx2 = c.getContext('2d');
+    const nuevo = c.cloneNode(true);
+    c.parentNode.replaceChild(nuevo, c);
+    if (c === canvasR) canvasR = nuevo;
+    if (c === canvasE) canvasE = nuevo;
+    c = nuevo;
+    const ctx3 = c.getContext('2d');
+
+    const rect = c.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    c.width  = Math.floor((rect.width  || 300) * dpr);
+    c.height = Math.floor((rect.height || 120) * dpr);
+    ctx3.scale(dpr, dpr);
+    ctx3.strokeStyle = '#1a1c1e';
+    ctx3.lineWidth = 2;
+    ctx3.lineCap = 'round';
+    ctx3.lineJoin = 'round';
+
+    let drawing = false;
+    const pos = e => {
+      const b = c.getBoundingClientRect();
+      const src = e.touches ? e.touches[0] : e;
+      return { x: src.clientX - b.left, y: src.clientY - b.top };
+    };
+
+    c.addEventListener('mousedown',  e => { drawing = true; const p = pos(e); ctx3.beginPath(); ctx3.moveTo(p.x, p.y); });
+    c.addEventListener('mousemove',  e => { if (!drawing) return; const p = pos(e); ctx3.lineTo(p.x, p.y); ctx3.stroke(); });
+    window.addEventListener('mouseup',   () => drawing = false);
+    c.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const p = pos(e); ctx3.beginPath(); ctx3.moveTo(p.x, p.y); }, { passive: false });
+    c.addEventListener('touchmove',  e => { if (!drawing) return; e.preventDefault(); const p = pos(e); ctx3.lineTo(p.x, p.y); ctx3.stroke(); }, { passive: false });
+    window.addEventListener('touchend',  () => drawing = false);
+
+    return ctx3;
+  }
+
+  function limpiarFirmaReceptor() { ctxR.clearRect(0, 0, canvasR.width, canvasR.height); }
+  function limpiarFirmaEmpleado()  { ctxE.clearRect(0, 0, canvasE.width, canvasE.height); }
+
+  function finalizarDevolucion() {
+    if (!asignacionSeleccionada) return;
+    const pendientes = asignacionSeleccionada.equipos.filter(e => !e.devuelto);
+    const total = asignacionSeleccionada.equipos.length;
+    const devCount = total - pendientes.length;
+
+    if (pendientes.length > 0) {
+      if (!confirm(`Quedan ${pendientes.length} activo(s) pendientes de entrega.\n\n¿Desea registrar la devolución parcial y mantener la responsiva abierta?`)) return;
+    }
+
+    const r = registrarDevolucion(
+      asignacionSeleccionada.folio,
+      asignacionSeleccionada.equipos,
+      canvasR.toDataURL(),
+      document.getElementById('txtObservaciones').value,
+      fotoDevolucionBase64
+    );
+
+    const a = document.getElementById('alertaDevolucion');
+
+    if (r.estado === 'DEVUELTO_TOTAL') {
+      a.innerHTML = `<strong>Devolución total completada.</strong> Folio ${asignacionSeleccionada.folio} — Todos los activos fueron recibidos a satisfacción. Colaborador: ${asignacionSeleccionada.empleadoNombre}.`;
+      a.className = 'alert alert-success';
+      a.style.display = 'flex';
+      ocultarDetalles();
+    } else {
+      a.innerHTML = `<strong>Devolución parcial registrada.</strong> Se recibieron ${devCount} de ${total} activos del folio ${asignacionSeleccionada.folio}. Quedan ${pendientes.length} activo(s) pendientes en resguardo.`;
+      a.className = 'alert alert-warning';
+      a.style.display = 'flex';
+      const asignaciones = obtenerAsignaciones();
+      const actualizada = asignaciones.find(x => x.folio === asignacionSeleccionada.folio);
+      if (actualizada) mostrarAsignacion(actualizada);
+    }
+
+    cargarAsignacionesActivas();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

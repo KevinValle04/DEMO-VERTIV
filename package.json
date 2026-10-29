@@ -1,0 +1,12 @@
+{
+  "name": "vertiv-mxl-demo",
+  "version": "1.0.0",
+  "description": "Demo Control de Activos y Equipos - Vertiv Planta Mexicali",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["vertiv", "demo", "assets"],
+  "author": "TI Services",
+  "license": "ISC"
+}

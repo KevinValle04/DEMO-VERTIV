@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: vertiv-mxl-demo
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: "."
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertiv MXL — Asignación de Activos</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="vertiv-logo.png" alt="Vertiv" class="brand-logo">
+    <div class="brand-divider"></div>
+    <div class="brand-text">
+      <span class="brand-name">Control de Activos y Equipos</span>
+      <span class="brand-sub">Planta Mexicali — MXL</span>
+    </div>
+  </a>
+  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+    <nav>
+      <ul class="navbar-nav">
+        <li><a href="index.html" class="nav-link active">Entrega / Asignación</a></li>
+        <li><a href="devolucion.html" class="nav-link">Devolución / Recepción</a></li>
+        <li><a href="localizador.html" class="nav-link">Localizador de Activo</a></li>
+      </ul>
+    </nav>
+    <div id="userNavBox" class="user-nav-box" style="display:none;">
+      <div class="user-nav-info">
+        <span class="user-nav-name" id="userNavName">Ing. Roberto Garza</span>
+        <span class="user-nav-role" id="userNavRole">Administrador TI</span>
+      </div>
+      <button type="button" class="btn-logout" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-title">Emisión de Responsiva de Equipos</div>
+  <div class="page-subtitle">Registro de activos asignados al colaborador y captura de firma de resguardo</div>
+</div>
+
+<main class="container">
+
+  <!-- BANNER SUPERVISOR -->
+  <div id="bannerSupervisor" class="alert alert-info" style="display:none; margin-bottom:16px;">
+    <div>
+      <strong>Perfil Supervisor:</strong> Modo de consulta y supervisión activo. Puedes consultar los listados de altas, activos asignados y directorio de empleados. La emisión o modificación de responsivas está reservada para el Administrador TI.
+    </div>
+  </div>
+
+  <!-- PESTAÑAS DE VISTA -->
+  <div class="pestanas-box" style="display:flex; gap:8px; margin-bottom:16px; border-bottom:1px solid var(--vertiv-border); padding-bottom:12px;">
+    <button type="button" id="tabBtnEmision" class="btn btn-primary btn-sm" onclick="cambiarPestana('emision')">
+      Nueva Alta / Emisión
+    </button>
+    <button type="button" id="tabBtnConsulta" class="btn btn-outline btn-sm" onclick="cambiarPestana('consulta')">
+      Listado de Altas y Empleados
+    </button>
+  </div>
+
+  <!-- CONTENEDOR EMISIÓN (ADMINISTRADOR) -->
+  <div id="contenedorEmision">
+
+    <!-- ALERTA EXITO -->
+    <div id="alertaExito" class="alert alert-success" style="display:none;"></div>
+
+    <!-- STEP TRACKER -->
+    <div class="steps-track">
+      <div class="step-item active">
+        <div class="step-num">1</div>
+        <span class="step-label">Datos del colaborador</span>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <span class="step-label">Escaneo de activos</span>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <span class="step-label">Firma y confirmación</span>
+      </div>
+    </div>
+
+  <!-- SECCION 1: COLABORADOR -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Información del Colaborador</h2>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="escanearGafete()">
+          Escanear Gafete
+        </button>
+        <span class="badge badge-gray">Paso 1 de 3</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- VISOR RÁPIDO DE GAFETE -->
+      <div id="gafeteScannerBox" style="display:none; margin-bottom:14px;" class="scanner-wrapper">
+        <div class="scanner-tip">
+          Coloque el código de barras o QR de la credencial frente a la cámara
+        </div>
+        <div class="scanner-video-area">
+          <div id="readerGafete"></div>
+        </div>
+        <div class="scanner-controls">
+          <button type="button" class="close-scan-btn" onclick="detenerEscanerGafete()">Cerrar Escáner</button>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label" for="empleadoSelect">Colaborador existente</label>
+          <select id="empleadoSelect" class="form-select" onchange="seleccionarColaborador(this.value)">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="empleadoId">N° de Nómina / ID <span style="color:var(--vertiv-red)">*</span></label>
+          <input type="text" id="empleadoId" class="form-control" placeholder="Ej. V-1042">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="empleadoNombre">Nombre completo <span style="color:var(--vertiv-red)">*</span></label>
+          <input type="text" id="empleadoNombre" class="form-control" placeholder="Ej. Juan Pérez García">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="empleadoDepto">Departamento / Área</label>
+          <input type="text" id="empleadoDepto" class="form-control" placeholder="Ej. Ingeniería de Planta">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="fechaEntrega">Fecha de asignación</label>
+          <input type="date" id="fechaEntrega" class="form-control">
+        </div>
+      </div>
+
+      <!-- AVISO DE EXPEDIENTE / RESPONSIVA EXISTENTE -->
+      <div id="avisoAnexoBox" class="alert alert-info" style="display:none; margin-top:14px; margin-bottom:0;">
+        <span id="avisoAnexoTexto"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCION 2: ESCANEO -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Activos a Entregar</h2>
+      <span class="badge badge-gray">Paso 2 de 3</span>
+    </div>
+    <div class="card-body">
+
+      <!-- VISOR CÁMARA -->
+      <div id="scannerContainer" style="display:none; margin-bottom:16px;">
+        <div class="scanner-wrapper">
+          <div class="scanner-tip">
+            Mantenga la cámara a 12–18 cm del código. Use 2x o 3x para códigos pequeños.
+          </div>
+          <div class="scanner-video-area">
+            <div id="reader"></div>
+            <div class="laser-line" id="laserLine"></div>
+          </div>
+          <div class="scanner-controls">
+            <span class="scanner-controls-label">Zoom</span>
+            <button class="zoom-btn active" id="btnZoom1" onclick="aplicarZoom(1)">1×</button>
+            <button class="zoom-btn" id="btnZoom2" onclick="aplicarZoom(2)">2×</button>
+            <button class="zoom-btn" id="btnZoom3" onclick="aplicarZoom(3)">3×</button>
+            <button class="torch-btn" id="btnTorch" onclick="toggleFlash()">Luz</button>
+            <button class="close-scan-btn" onclick="detenerEscaner()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTONES DE CAPTURA -->
+      <div class="action-bar" style="padding-top:0; margin-bottom:16px;">
+        <button type="button" class="btn btn-primary" onclick="iniciarEscaner()">
+          Activar Cámara
+        </button>
+        <label class="btn btn-outline" style="cursor:pointer;">
+          Subir Foto del Código
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="escanearDesdeArchivo(this)">
+        </label>
+        <span style="font-size:12px; color:var(--vertiv-gray-500);">Lector USB o ingreso manual disponible en el campo inferior</span>
+      </div>
+
+      <!-- FORMULARIO DE ACTIVO -->
+      <div class="section-divider">Datos del activo</div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label" for="inputCodigo">Código de barras / Tag <span style="color:var(--vertiv-red)">*</span></label>
+          <input type="text" id="inputCodigo" class="form-control" placeholder="Escanear o escribir...">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="selectCategoria">Categoría</label>
+          <select id="selectCategoria" class="form-select">
+            <option value="Laptop">Laptop / Computadora</option>
+            <option value="Cargador">Cargador / Adaptador</option>
+            <option value="Monitor">Monitor / Pantalla</option>
+            <option value="Radio">Radio Comunicación</option>
+            <option value="Herramienta">Herramienta de mano</option>
+            <option value="Medicion">Equipo de medición</option>
+            <option value="Celular">Celular / Tablet</option>
+            <option value="Credencial">Gafete / Credencial / Llaves</option>
+            <option value="Material">Material / Insumo</option>
+            <option value="Otro">Otro activo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inputDescripcion">Descripción / Modelo</label>
+          <input type="text" id="inputDescripcion" class="form-control" placeholder="Ej. Dell Latitude 5430">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="inputSerie">N° de Serie</label>
+          <input type="text" id="inputSerie" class="form-control" placeholder="Opcional">
+        </div>
+        <div class="form-group" style="margin-bottom:0; display:flex; align-items:flex-end;">
+          <button class="btn btn-dark" style="width:100%;" onclick="agregarEquipoALista()">
+            Agregar activo a la lista
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="section-divider" style="margin-top:20px;">
+        Activos en esta responsiva &nbsp;<span id="totalEquiposBadge" class="badge badge-gray">0</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Código / Tag</th>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              <th>N° Serie</th>
+              <th style="text-align:right; width:90px;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaEquiposCuerpo">
+            <tr>
+              <td colspan="5" class="table-empty">Sin activos registrados. Escanee o escriba un código de barras para comenzar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCION 3: EVIDENCIA Y FIRMA -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Evidencia y Firma de Aceptación</h2>
+      <span class="badge badge-gray">Paso 3 de 3</span>
+    </div>
+    <div class="card-body">
+
+      <!-- FOTO DE EVIDENCIA -->
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Evidencia Fotográfica de los Equipos (Opcional)</label>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <label class="btn btn-outline btn-sm" style="cursor:pointer; margin-bottom:0;">
+            Adjuntar Foto
+            <input type="file" id="inputFotoEntrega" accept="image/*" capture="environment" style="display:none;" onchange="procesarFotoEntrega(this)">
+          </label>
+          <div id="previewFotoEntregaBox" style="display:none; align-items:center; gap:8px;">
+            <img id="imgPreviewEntrega" src="" alt="Evidencia" style="width:48px; height:48px; object-fit:cover; border-radius:4px; border:1px solid var(--vertiv-border);">
+            <span style="font-size:12px; color:var(--vertiv-success-text); font-weight:600;">Foto adjunta</span>
+            <button type="button" class="btn btn-ghost btn-xs" onclick="eliminarFotoEntrega()" style="color:var(--vertiv-danger-text)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size:12.5px; color:var(--vertiv-gray-500); margin-bottom:14px; line-height:1.6;">
+        Al firmar, el colaborador declara haber recibido los activos listados en buen estado operativo y se compromete a su resguardo y devolución íntegra al término de su relación laboral con Vertiv Mexicali.
+      </p>
+      <div class="sig-box">
+        <canvas id="canvasFirma" class="sig-canvas"></canvas>
+        <div class="sig-footer">
+          <span>Firma en pantalla con el dedo o ratón</span>
+          <button type="button" class="btn btn-ghost btn-xs" onclick="limpiarFirma()">Limpiar Firma</button>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="reiniciarFormulario()">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarResponsivaCompleta()">
+          Guardar y emitir responsiva
+        </button>
+      </div>
+    </div>
+  </div>
+  </div> <!-- Fin de contenedorEmision -->
+
+  <!-- CONTENEDOR CONSULTA ALTAS (SUPERVISOR Y CONSULTA ADMIN) -->
+  <div id="contenedorConsultaAltas" style="display:none;">
+
+    <!-- DIRECTORIO DE COLABORADORES -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Directorio de Colaboradores de Planta</h2>
+        <span class="badge badge-gray" id="badgeTotalEmpleados">0 colaboradores</span>
+      </div>
+      <div class="card-body">
+        <div id="gridDirectorioEmpleados" class="grid-3"></div>
+      </div>
+    </div>
+
+    <!-- LISTADO DE ALTAS Y RESPONSIVAS -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Registro Histórico de Altas y Responsivas Emitidas</h2>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="text" id="inputBuscarAltas" class="form-control" style="width:240px; font-size:12px; padding:6px 10px;" placeholder="Buscar por folio, nombre o nómina..." oninput="filtrarAltas(this.value)">
+        </div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="table-responsive" style="border:none;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Folio</th>
+                <th>Colaborador</th>
+                <th>N° Nómina</th>
+                <th>Departamento</th>
+                <th>Fecha Alta</th>
+                <th>Activos</th>
+                <th>Estado</th>
+                <th style="text-align:right;">Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAltasCuerpo"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISOR DETALLE DE RESPONSIVA -->
+    <div id="modalDetalleAlta" class="card" style="display:none; border-left:4px solid var(--vertiv-red);">
+      <div class="card-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-weight:700; font-size:14px; color:var(--vertiv-dark);" id="modalFolio">—</span>
+          <span id="modalEstadoBadge"></span>
+        </div>
+        <button type="button" class="btn btn-ghost btn-xs" onclick="cerrarDetalleAlta()">Cerrar Detalle</button>
+      </div>
+      <div class="card-body">
+        <div class="employee-card" style="margin-top:0; margin-bottom:14px;">
+          <div class="employee-card-grid">
+            <div>
+              <div class="employee-field-label">Colaborador</div>
+              <div class="employee-field-value" id="modalEmpleado">—</div>
+            </div>
+            <div>
+              <div class="employee-field-label">N° Nómina</div>
+              <div class="employee-field-value" id="modalNomina">—</div>
+            </div>
+            <div>
+              <div class="employee-field-label">Departamento</div>
+              <div class="employee-field-value" id="modalDepto">—</div>
+            </div>
+            <div>
+              <div class="employee-field-label">Fecha de Entrega</div>
+              <div class="employee-field-value" id="modalFecha">—</div>
+            </div>
+            <div>
+              <div class="employee-field-label">Evidencia</div>
+              <div class="employee-field-value" id="modalEvidencia">—</div>
+            </div>
+            <div>
+              <div class="employee-field-label">Firma de Recibido</div>
+              <div class="employee-field-value" id="modalFirma">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider">Equipos registrados en esta responsiva</div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Código / Tag</th>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>N° Serie</th>
+                <th>Estatus Actual</th>
+              </tr>
+            </thead>
+            <tbody id="modalEquiposCuerpo"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- Fin de contenedorConsultaAltas -->
+
+</main>
+
+<footer class="footer">
+  <strong>Vertiv</strong> — Control de Activos y Equipos &nbsp;·&nbsp; Planta Mexicali (MXL) &nbsp;·&nbsp; © 2026
+</footer>
+
+<script src="db.js"></script>
+<script>
+  let equiposActuales = [];
+  let html5QrCode = null;
+  let canvas, ctx, firmando = false, tieneFirma = false;
+  let fotoEntregaBase64 = null;
+  let html5QrCodeGafete = null;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('fechaEntrega').valueAsDate = new Date();
+    cargarSelectColaboradores();
+    configurarCanvasFirma();
+    inicializarSegunRol();
+    document.getElementById('inputCodigo').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); agregarEquipoALista(); }
+    });
+  });
+
+  function inicializarSegunRol() {
+    if (esSupervisor()) {
+      document.getElementById('bannerSupervisor').style.display = 'flex';
+      const tabEmision = document.getElementById('tabBtnEmision');
+      tabEmision.style.opacity = '0.5';
+      tabEmision.title = 'Acceso reservado para Administrador TI';
+      cambiarPestana('consulta');
+    } else {
+      cambiarPestana('emision');
+    }
+  }
+
+  function cambiarPestana(tipo) {
+    if (tipo === 'emision') {
+      if (esSupervisor()) {
+        alert('Acceso restringido: La emisión de nuevas responsivas está reservada para el perfil de Administrador TI.');
+        return;
+      }
+      document.getElementById('contenedorEmision').style.display = 'block';
+      document.getElementById('contenedorConsultaAltas').style.display = 'none';
+      document.getElementById('tabBtnEmision').className = 'btn btn-primary btn-sm';
+      document.getElementById('tabBtnConsulta').className = 'btn btn-outline btn-sm';
+      document.querySelector('.page-title').textContent = 'Emisión de Responsiva de Equipos';
+      document.querySelector('.page-subtitle').textContent = 'Registro de activos asignados al colaborador y captura de firma de resguardo';
+    } else {
+      document.getElementById('contenedorEmision').style.display = 'none';
+      document.getElementById('contenedorConsultaAltas').style.display = 'block';
+      document.getElementById('tabBtnEmision').className = 'btn btn-outline btn-sm';
+      document.getElementById('tabBtnConsulta').className = 'btn btn-primary btn-sm';
+      document.querySelector('.page-title').textContent = 'Consulta y Supervisión de Altas de Equipos';
+      document.querySelector('.page-subtitle').textContent = 'Supervisión de responsivas vigentes, directorio de colaboradores y activos asignados';
+      renderizarDirectorioEmpleados();
+      renderizarConsultaAltas();
+    }
+  }
+
+  function renderizarDirectorioEmpleados() {
+    const colabs = obtenerColaboradores();
+    const asignaciones = obtenerAsignaciones();
+    document.getElementById('badgeTotalEmpleados').textContent = `${colabs.length} colaboradores`;
+    const grid = document.getElementById('gridDirectorioEmpleados');
+    grid.innerHTML = '';
+    colabs.forEach(c => {
+      const asig = asignaciones.find(a => a.empleadoId.trim().toUpperCase() === c.id.trim().toUpperCase() && (a.estado === 'ACTIVO' || a.estado === 'DEVUELTO_PARCIAL'));
+      const activosCount = asig ? asig.equipos.filter(e => !e.devuelto).length : 0;
+      const card = document.createElement('div');
+      card.className = 'employee-card';
+      card.style.marginTop = '0';
+      card.innerHTML = `
+        <div style="font-weight:700; font-size:13px; color:var(--slate-900);">${c.nombre}</div>
+        <div style="font-size:11.5px; color:var(--slate-500); margin:2px 0 8px;"><code>${c.id}</code> · ${c.depto || 'General'}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:6px; border-top:1px solid var(--vertiv-border);">
+          <span class="badge ${activosCount > 0 ? 'badge-warning' : 'badge-gray'}">${activosCount} activo(s) a cargo</span>
+          ${asig ? `<button type="button" class="btn btn-outline btn-xs" onclick="mostrarDetalleAlta('${asig.folio}')">Ver Alta</button>` : '<span style="font-size:11px; color:var(--slate-400);">Sin activos</span>'}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderizarConsultaAltas(filtro = '') {
+    let asignaciones = obtenerAsignaciones();
+    if (filtro) {
+      const f = filtro.toLowerCase();
+      asignaciones = asignaciones.filter(a => 
+        a.folio.toLowerCase().includes(f) ||
+        a.empleadoNombre.toLowerCase().includes(f) ||
+        a.empleadoId.toLowerCase().includes(f) ||
+        (a.depto && a.depto.toLowerCase().includes(f))
+      );
+    }
+    const tb = document.getElementById('tablaAltasCuerpo');
+    if (!asignaciones.length) {
+      tb.innerHTML = '<tr><td colspan="8" class="table-empty">No se encontraron responsivas registradas.</td></tr>';
+      return;
+    }
+    tb.innerHTML = '';
+    asignaciones.forEach(a => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${a.folio}</strong></td>
+        <td style="font-weight:600; color:var(--slate-900);">${a.empleadoNombre}</td>
+        <td><code>${a.empleadoId}</code></td>
+        <td style="color:var(--slate-600);">${a.depto || 'Planta'}</td>
+        <td style="color:var(--slate-500);">${a.fechaEntrega || '—'}</td>
+        <td><span class="badge badge-info">${a.equipos.length} equipos</span></td>
+        <td><span class="badge ${a.estado === 'ACTIVO' ? 'badge-warning' : 'badge-success'}">${a.estado}</span></td>
+        <td style="text-align:right;">
+          <button type="button" class="btn btn-outline btn-xs" onclick="mostrarDetalleAlta('${a.folio}')">Ver Detalle</button>
+        </td>
+      `;
+      tb.appendChild(tr);
+    });
+  }
+
+  function mostrarDetalleAlta(folio) {
+    const a = obtenerAsignaciones().find(x => x.folio === folio);
+    if (!a) return;
+    document.getElementById('modalFolio').textContent = `Responsiva ${a.folio}`;
+    document.getElementById('modalEstadoBadge').innerHTML = `<span class="badge ${a.estado === 'ACTIVO' ? 'badge-warning' : 'badge-success'}">${a.estado}</span>`;
+    document.getElementById('modalEmpleado').textContent = a.empleadoNombre;
+    document.getElementById('modalNomina').textContent = a.empleadoId;
+    document.getElementById('modalDepto').textContent = a.depto || 'General';
+    document.getElementById('modalFecha').textContent = a.fechaEntrega || '—';
+    document.getElementById('modalEvidencia').textContent = a.fotoEntrega ? 'Foto adjunta en expediente' : 'Sin fotografía';
+    document.getElementById('modalFirma').textContent = a.firmaEntrega ? 'Firma digital capturada' : 'Sin firma';
+    
+    const eqTb = document.getElementById('modalEquiposCuerpo');
+    eqTb.innerHTML = '';
+    a.equipos.forEach(eq => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><code>${eq.codigo}</code></td>
+        <td><span class="badge badge-info">${eq.categoria}</span></td>
+        <td>${eq.descripcion}</td>
+        <td style="color:var(--slate-500);">${eq.serie || 'S/N'}</td>
+        <td><span class="badge ${eq.devuelto ? 'badge-success' : 'badge-warning'}">${eq.devuelto ? 'Devuelto a Planta' : 'En Resguardo'}</span></td>
+      `;
+      eqTb.appendChild(tr);
+    });
+
+    const m = document.getElementById('modalDetalleAlta');
+    m.style.display = 'block';
+    window.scrollTo({ top: m.offsetTop - 70, behavior: 'smooth' });
+  }
+
+  function cerrarDetalleAlta() {
+    document.getElementById('modalDetalleAlta').style.display = 'none';
+  }
+
+  function filtrarAltas(val) {
+    renderizarConsultaAltas(val.trim());
+  }
+
+  function cargarSelectColaboradores() {
+    const s = document.getElementById('empleadoSelect');
+    s.innerHTML = '<option value="">— Seleccionar —</option>';
+    obtenerColaboradores().forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = `${c.id} — ${c.nombre}`;
+      s.appendChild(o);
+    });
+  }
+
+  function seleccionarColaborador(id) {
+    if (!id) {
+      document.getElementById('avisoAnexoBox').style.display = 'none';
+      return;
+    }
+    const c = obtenerColaboradores().find(x => x.id === id);
+    if (c) {
+      document.getElementById('empleadoId').value = c.id;
+      document.getElementById('empleadoNombre').value = c.nombre;
+      document.getElementById('empleadoDepto').value = c.depto;
+      verificarResponsivaExistente(c.id, c.nombre);
+    }
+  }
+
+  function verificarResponsivaExistente(empId, empNombre) {
+    const asig = obtenerAsignacionActivaPorEmpleado(empId);
+    const box = document.getElementById('avisoAnexoBox');
+    const txt = document.getElementById('avisoAnexoTexto');
+    if (asig) {
+      const pendientes = asig.equipos.filter(e => !e.devuelto).length;
+      txt.innerHTML = `<strong>Expediente activo detectado (${asig.folio}):</strong> ${empNombre} cuenta con <strong>${pendientes} activo(s)</strong> a su cargo. Los nuevos equipos registrados se anexarán a esta responsiva.`;
+      box.style.display = 'flex';
+    } else {
+      box.style.display = 'none';
+    }
+  }
+
+  function reproducirBeep() {
+    try {
+      const ctx2 = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx2.createOscillator(), g = ctx2.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(880, ctx2.currentTime);
+      g.gain.setValueAtTime(0.18, ctx2.currentTime);
+      o.connect(g); g.connect(ctx2.destination);
+      o.start(); o.stop(ctx2.currentTime + 0.12);
+    } catch(e) {}
+  }
+
+  async function iniciarEscaner() {
+    document.getElementById('scannerContainer').style.display = 'block';
+    if (html5QrCode) {
+      try { if (html5QrCode.isScanning) await html5QrCode.stop(); await html5QrCode.clear(); } catch(e) {}
+      html5QrCode = null;
+    }
+    html5QrCode = new Html5Qrcode("reader", {
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.QR_CODE,  Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.UPC_A
+      ],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      verbose: false
+    });
+    const onOk = (text) => { reproducirBeep(); document.getElementById('inputCodigo').value = text; detenerEscaner(); document.getElementById('inputDescripcion').focus(); };
+    const cfg = { fps: 15, qrbox: (w,h) => ({ width: Math.min(Math.floor(w*0.85), 320), height: Math.min(Math.floor(h*0.55), 180) }) };
+    try {
+      let cam = { facingMode: 'environment' };
+      try { const cams = await Html5Qrcode.getCameras(); if (cams.length) cam = (cams.find(c => /back|rear|trasera|0/i.test(c.label)) || cams[cams.length-1]).id; } catch(e) {}
+      await html5QrCode.start(cam, cfg, onOk);
+      try { const t = html5QrCode.getRunningTrackCameraCapabilities(); if (t && t.torchFeature().isSupported()) document.getElementById('btnTorch').style.display = 'block'; } catch(e) {}
+    } catch(err) {
+      const s = err && err.toString() || '';
+      if (/NotAllowed|Permission|denied/i.test(s)) {
+        alert('Permiso de cámara denegado en el navegador. Habilite el permiso de cámara en los ajustes del sitio.');
+      } else {
+        try { await html5QrCode.start({ facingMode: 'user' }, cfg, onOk); }
+        catch(e2) { alert('No se pudo iniciar la cámara en vivo. Puede usar el botón de subir foto o el campo manual.'); detenerEscaner(); }
+      }
+    }
+  }
+
+  async function detenerEscaner() {
+    if (html5QrCode && html5QrCode.isScanning) try { await html5QrCode.stop(); } catch(e) {}
+    document.getElementById('scannerContainer').style.display = 'none';
+    document.getElementById('btnTorch').style.display = 'none';
+    document.getElementById('btnTorch').classList.remove('on');
+  }
+
+  let linternaOn = false;
+  async function toggleFlash() {
+    if (!html5QrCode || !html5QrCode.isScanning) return;
+    try { linternaOn = !linternaOn; await html5QrCode.applyVideoConstraints({ advanced: [{ torch: linternaOn }] }); document.getElementById('btnTorch').classList.toggle('on', linternaOn); } catch(e) {}
+  }
+
+  async function aplicarZoom(n) {
+    ['btnZoom1','btnZoom2','btnZoom3'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('btnZoom'+n).classList.add('active');
+    if (!html5QrCode || !html5QrCode.isScanning) return;
+    try { await html5QrCode.applyVideoConstraints({ advanced: [{ zoom: n }] }); }
+    catch(e) { const v = document.querySelector('#reader video'); if (v) { v.style.transform = `scale(${n})`; v.style.transformOrigin = 'center'; v.style.transition = 'transform .2s'; } }
+  }
+
+  async function escanearDesdeArchivo(input) {
+    if (!input.files || !input.files[0]) return;
+    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader", { formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.UPC_A], experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
+    try { const t = await html5QrCode.scanFile(input.files[0], true); reproducirBeep(); document.getElementById('inputCodigo').value = t; document.getElementById('inputDescripcion').focus(); }
+    catch(e) { alert('No se pudo decodificar el código de la imagen. Intente con mejor enfoque e iluminación.'); }
+    finally { input.value = ''; }
+  }
+
+  // ESCANEAR GAFETE
+  async function escanearGafete() {
+    const box = document.getElementById('gafeteScannerBox');
+    box.style.display = 'block';
+
+    if (html5QrCodeGafete) {
+      try { if (html5QrCodeGafete.isScanning) await html5QrCodeGafete.stop(); await html5QrCodeGafete.clear(); } catch(e) {}
+      html5QrCodeGafete = null;
+    }
+
+    html5QrCodeGafete = new Html5Qrcode("readerGafete", {
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.QR_CODE,  Html5QrcodeSupportedFormats.EAN_13
+      ],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      verbose: false
+    });
+
+    const onOk = (text) => {
+      reproducirBeep();
+      detenerEscanerGafete();
+      const colaboradores = obtenerColaboradores();
+      const colab = colaboradores.find(c => c.id.trim().toUpperCase() === text.trim().toUpperCase());
+      if (colab) {
+        document.getElementById('empleadoSelect').value = colab.id;
+        document.getElementById('empleadoId').value = colab.id;
+        document.getElementById('empleadoNombre').value = colab.nombre;
+        document.getElementById('empleadoDepto').value = colab.depto;
+        verificarResponsivaExistente(colab.id, colab.nombre);
+      } else {
+        document.getElementById('empleadoId').value = text;
+        document.getElementById('empleadoNombre').focus();
+        verificarResponsivaExistente(text, text);
+      }
+    };
+
+    const cfg = { fps: 15, qrbox: { width: 280, height: 160 } };
+    try {
+      let cam = { facingMode: 'environment' };
+      try { const cams = await Html5Qrcode.getCameras(); if (cams.length) cam = (cams.find(c => /back|rear|trasera|0/i.test(c.label)) || cams[cams.length-1]).id; } catch(e) {}
+      await html5QrCodeGafete.start(cam, cfg, onOk);
+    } catch(err) {
+      alert('No se pudo acceder a la cámara para lectura de credencial.');
+      detenerEscanerGafete();
+    }
+  }
+
+  async function detenerEscanerGafete() {
+    if (html5QrCodeGafete && html5QrCodeGafete.isScanning) {
+      try { await html5QrCodeGafete.stop(); } catch(e) {}
+    }
+    document.getElementById('gafeteScannerBox').style.display = 'none';
+  }
+
+  // FOTO DE EVIDENCIA
+  function procesarFotoEntrega(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const c = document.createElement('canvas');
+        const max = 800;
+        let w = img.width, h = img.height;
+        if (w > max || h > max) {
+          if (w > h) { h = Math.round(h * max / w); w = max; }
+          else { w = Math.round(w * max / h); h = max; }
+        }
+        c.width = w; c.height = h;
+        const ctxImg = c.getContext('2d');
+        ctxImg.drawImage(img, 0, 0, w, h);
+        fotoEntregaBase64 = c.toDataURL('image/jpeg', 0.7);
+        document.getElementById('imgPreviewEntrega').src = fotoEntregaBase64;
+        document.getElementById('previewFotoEntregaBox').style.display = 'flex';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function eliminarFotoEntrega() {
+    fotoEntregaBase64 = null;
+    document.getElementById('inputFotoEntrega').value = '';
+    document.getElementById('imgPreviewEntrega').src = '';
+    document.getElementById('previewFotoEntregaBox').style.display = 'none';
+  }
+
+  function agregarEquipoALista() {
+    const codigo = document.getElementById('inputCodigo').value.trim();
+    if (!codigo) { alert('Ingrese o escanee un código de barras.'); document.getElementById('inputCodigo').focus(); return; }
+    if (equiposActuales.some(e => e.codigo.toUpperCase() === codigo.toUpperCase())) { alert('El código ' + codigo + ' ya está agregado.'); return; }
+    equiposActuales.push({ codigo, categoria: document.getElementById('selectCategoria').value, descripcion: document.getElementById('inputDescripcion').value.trim() || document.getElementById('selectCategoria').value, serie: document.getElementById('inputSerie').value.trim() || 'S/N', devuelto: false });
+    document.getElementById('inputCodigo').value = '';
+    document.getElementById('inputDescripcion').value = '';
+    document.getElementById('inputSerie').value = '';
+    document.getElementById('inputCodigo').focus();
+    actualizarTabla();
+  }
+
+  function eliminarEquipo(i) { equiposActuales.splice(i,1); actualizarTabla(); }
+
+  function actualizarTabla() {
+    const tb = document.getElementById('tablaEquiposCuerpo');
+    document.getElementById('totalEquiposBadge').textContent = equiposActuales.length;
+    if (!equiposActuales.length) {
+      tb.innerHTML = '<tr><td colspan="5" class="table-empty">Sin activos registrados. Escanee o escriba un código de barras para comenzar.</td></tr>';
+      return;
+    }
+    tb.innerHTML = '';
+    equiposActuales.forEach((eq,i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><code style="font-size:12px;color:var(--vertiv-gray-700)">${eq.codigo}</code></td><td><span class="badge badge-info">${eq.categoria}</span></td><td style="color:var(--vertiv-dark)">${eq.descripcion}</td><td style="color:var(--vertiv-gray-500)">${eq.serie}</td><td style="text-align:right"><button class="btn btn-ghost btn-xs" onclick="eliminarEquipo(${i})" style="color:var(--vertiv-danger-text)">Quitar</button></td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  function configurarCanvasFirma() {
+    canvas = document.getElementById('canvasFirma');
+    ctx = canvas.getContext('2d');
+    const r = canvas.getBoundingClientRect();
+    canvas.width = r.width * 2; canvas.height = 120 * 2;
+    ctx.scale(2,2);
+    ctx.strokeStyle = '#1a1c1e'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const pos = e => { const b = canvas.getBoundingClientRect(); const c = e.touches ? e.touches[0] : e; return { x: c.clientX - b.left, y: c.clientY - b.top }; };
+    canvas.addEventListener('mousedown',  e => { firmando=true; tieneFirma=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+    canvas.addEventListener('mousemove',  e => { if(!firmando) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); });
+    window.addEventListener('mouseup',    () => firmando = false);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); firmando=true; tieneFirma=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }, { passive:false });
+    canvas.addEventListener('touchmove',  e => { if(!firmando) return; e.preventDefault(); const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }, { passive:false });
+    window.addEventListener('touchend',   () => firmando = false);
+  }
+
+  function limpiarFirma() { ctx.clearRect(0,0,canvas.width,canvas.height); tieneFirma=false; }
+
+  function guardarResponsivaCompleta() {
+    const id = document.getElementById('empleadoId').value.trim();
+    const nombre = document.getElementById('empleadoNombre').value.trim();
+    if (!id || !nombre) { alert('Ingrese el N° de nómina y el nombre del colaborador.'); return; }
+    if (!equiposActuales.length) { alert('Agregue al menos un activo a la responsiva.'); return; }
+    if (!tieneFirma && !confirm('No se ha capturado firma de conformidad. ¿Desea guardar de todos modos?')) return;
+    guardarColaborador({ id, nombre, depto: document.getElementById('empleadoDepto').value.trim() || 'General', puesto: 'Personal Asignado' });
+    const r = guardarNuevaAsignacion({
+      empleadoId: id,
+      empleadoNombre: nombre,
+      depto: document.getElementById('empleadoDepto').value.trim(),
+      fechaEntrega: document.getElementById('fechaEntrega').value,
+      equipos: equiposActuales,
+      fotoEntrega: fotoEntregaBase64,
+      firmaEntrega: tieneFirma ? canvas.toDataURL() : null
+    });
+    const a = document.getElementById('alertaExito');
+    if (r.esAnexo) {
+      a.innerHTML = `<strong>Activos anexados exitosamente.</strong> Se sumaron ${equiposActuales.length} equipo(s) a la responsiva activa <strong>${r.folio}</strong> de ${nombre}. (Total asignado: ${r.equipos.length} activos).`;
+    } else {
+      a.innerHTML = `<strong>Responsiva ${r.folio} registrada correctamente.</strong> ${equiposActuales.length} activo(s) asignados a ${nombre}.`;
+    }
+    a.style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    reiniciarFormulario();
+    cargarSelectColaboradores();
+  }
+
+  function reiniciarFormulario() {
+    equiposActuales = []; actualizarTabla(); limpiarFirma(); eliminarFotoEntrega();
+    document.getElementById('avisoAnexoBox').style.display = 'none';
+    document.getElementById('empleadoSelect').value = '';
+    document.getElementById('empleadoId').value = '';
+    document.getElementById('empleadoNombre').value = '';
+    document.getElementById('empleadoDepto').value = '';
+    document.getElementById('fechaEntrega').valueAsDate = new Date();
+  }
+</script>
+</body>
+</html>

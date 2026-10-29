@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertiv MXL — Catálogo de Códigos de Prueba</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <style>
+    .barcode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .barcode-card {
+      background: #fff;
+      border: 1px solid var(--vertiv-border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .barcode-svg {
+      max-width: 100%;
+      height: 70px;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="vertiv-logo.png" alt="Vertiv" class="brand-logo">
+    <div class="brand-divider"></div>
+    <div class="brand-text">
+      <span class="brand-name">Control de Activos y Equipos</span>
+      <span class="brand-sub">Planta Mexicali — MXL</span>
+    </div>
+  </a>
+  <nav>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">Entrega / Asignación</a></li>
+      <li><a href="devolucion.html" class="nav-link">Devolución / Recepción</a></li>
+      <li><a href="localizador.html" class="nav-link">Localizador de Activo</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-title">Catálogo de Códigos para Pruebas de Escaneo</div>
+  <div class="page-subtitle">Códigos de barras Code 128 listos para escaneo directo desde monitor, celular o lector USB</div>
+</div>
+
+<main class="container">
+  <div class="alert alert-info">
+    <div>
+      <strong>Instrucciones de demostración:</strong> Puede mantener esta pantalla visible en su monitor y escanear los códigos con la cámara de su teléfono móvil o un lector láser USB para simular el flujo en planta.
+    </div>
+  </div>
+
+  <!-- SECCIÓN 1: CÓDIGOS PARA PROBAR DEVOLUCIÓN -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Códigos Asignados — Carlos Mendoza Ruiz (V-1042)</h2>
+      <span class="badge badge-warning">Prueba en Devolución / Recepción</span>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 13px; color: var(--vertiv-gray-700); margin-bottom: 8px;">
+        En el módulo de <strong>Devolución</strong>, seleccione al colaborador Carlos Mendoza y escanee estos códigos para marcar su cotejo:
+      </p>
+
+      <div class="barcode-grid">
+        <div class="barcode-card">
+          <span class="badge badge-info">Laptop Dell</span>
+          <strong style="margin-top:4px; font-size:13px;">Latitude 5430 Core i7</strong>
+          <svg id="code-laptop" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">Serie: 8FG9X23</small>
+        </div>
+
+        <div class="barcode-card">
+          <span class="badge badge-info">Cargador Dell</span>
+          <strong style="margin-top:4px; font-size:13px;">Cargador USB-C 65W</strong>
+          <svg id="code-cargador" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">Serie: CN-0G6J41</small>
+        </div>
+
+        <div class="barcode-card">
+          <span class="badge badge-info">Radio Comunicación</span>
+          <strong style="margin-top:4px; font-size:13px;">Motorola DGP8550e</strong>
+          <svg id="code-radio" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">Serie: 782TXA091</small>
+        </div>
+
+        <div class="barcode-card">
+          <span class="badge badge-info">Multímetro</span>
+          <strong style="margin-top:4px; font-size:13px;">Fluke 87V Industrial</strong>
+          <svg id="code-fluke" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">Serie: FK-9871234</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: CÓDIGOS PARA PROBAR NUEVA ASIGNACIÓN -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Códigos de Stock para Nueva Asignación</h2>
+      <span class="badge badge-success">Prueba en Entrega</span>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 13px; color: var(--vertiv-gray-700); margin-bottom: 8px;">
+        Utilice estos códigos en el módulo de <strong>Entrega / Asignación</strong> para registrar activos a un colaborador:
+      </p>
+
+      <div class="barcode-grid">
+        <div class="barcode-card">
+          <span class="badge badge-gray">Laptop Lenovo</span>
+          <strong style="margin-top:4px; font-size:13px;">ThinkPad T14 Gen 3</strong>
+          <svg id="code-thinkpad" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">Tag: VERTIV-LAP-105</small>
+        </div>
+
+        <div class="barcode-card">
+          <span class="badge badge-gray">Monitor</span>
+          <strong style="margin-top:4px; font-size:13px;">HP 24 Pulgadas FHD</strong>
+          <svg id="code-monitor" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">Tag: VERTIV-MON-204</small>
+        </div>
+
+        <div class="barcode-card">
+          <span class="badge badge-gray">Herramienta</span>
+          <strong style="margin-top:4px; font-size:13px;">Rotomartillo Bosch 18V</strong>
+          <svg id="code-bosch" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">Tag: VERTIV-HRR-088</small>
+        </div>
+
+        <div class="barcode-card">
+          <span class="badge badge-gray">Credencial</span>
+          <strong style="margin-top:4px; font-size:13px;">Gafete Mariana López</strong>
+          <svg id="code-gafete" class="barcode-svg"></svg>
+          <small style="color: var(--vertiv-gray-500);">ID: V-1088</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <strong>Vertiv</strong> — Control de Activos y Equipos &nbsp;·&nbsp; Planta Mexicali (MXL) &nbsp;·&nbsp; © 2026
+</footer>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    JsBarcode("#code-laptop", "VERTIV-LAP-042", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+    JsBarcode("#code-cargador", "VERTIV-CHG-042", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+    JsBarcode("#code-radio", "VERTIV-RAD-015", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+    JsBarcode("#code-fluke", "VERTIV-FLK-108", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+
+    JsBarcode("#code-thinkpad", "VERTIV-LAP-105", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+    JsBarcode("#code-monitor", "VERTIV-MON-204", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+    JsBarcode("#code-bosch", "VERTIV-HRR-088", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+    JsBarcode("#code-gafete", "V-1088", { format: "CODE128", width: 2, height: 50, displayValue: true, fontSize: 13 });
+  });
+</script>
+</body>
+</html>
