@@ -4,978 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vertiv MXL — Asignación de Activos</title>
-  <style>
-/* =====================================================
-   Vertiv Asset Control — Executive Enterprise UI
-   Planta Mexicali (MXL)
-   ===================================================== */
-
-:root {
-  --vertiv-red: #d0021b;
-  --vertiv-red-dark: #b00116;
-  --vertiv-red-subtle: rgba(208, 2, 27, 0.08);
-  
-  --vertiv-dark: #0f172a;
-  --vertiv-nav: #0d0f12;
-  
-  --slate-900: #0f172a;
-  --slate-800: #1e293b;
-  --slate-700: #334155;
-  --slate-600: #475569;
-  --slate-500: #64748b;
-  --slate-400: #94a3b8;
-  --slate-300: #cbd5e1;
-  --slate-200: #e2e8f0;
-  --slate-100: #f1f5f9;
-  --slate-50:  #f8fafc;
-  
-  --vertiv-white: #ffffff;
-  --vertiv-border: #e2e8f0;
-  --vertiv-border-strong: #cbd5e1;
-  
-  --vertiv-success-bg: #f0fdf4;
-  --vertiv-success-text: #15803d;
-  --vertiv-success-border: #bbf7d0;
-  
-  --vertiv-warning-bg: #fffbeb;
-  --vertiv-warning-text: #b45309;
-  --vertiv-warning-border: #fde68a;
-  
-  --vertiv-info-bg: #f0f9ff;
-  --vertiv-info-text: #0369a1;
-  --vertiv-info-border: #bae6fd;
-  
-  --vertiv-danger-bg: #fef2f2;
-  --vertiv-danger-text: #b91c1c;
-  --vertiv-danger-border: #fecaca;
-  
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  
-  --radius-sm: 5px;
-  --radius: 8px;
-  --radius-lg: 10px;
-  
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font);
-  background-color: var(--slate-100);
-  color: var(--slate-800);
-  font-size: 13.5px;
-  line-height: 1.5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ─── NAVBAR ──────────────────────────────────────── */
-.navbar {
-  background: var(--vertiv-nav);
-  padding: 0 36px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  height: 64px;
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  text-decoration: none;
-  padding: 0;
-}
-
-.brand-logo {
-  height: 28px;
-  width: auto;
-  filter: invert(1) brightness(2);
-  display: block;
-}
-
-.brand-divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.16);
-  flex-shrink: 0;
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.brand-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffffff;
-  letter-spacing: 0.2px;
-}
-
-.brand-sub {
-  font-size: 11px;
-  color: var(--slate-400);
-  letter-spacing: 0.3px;
-}
-
-.navbar-nav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  color: var(--slate-400);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.1px;
-  border-radius: var(--radius-sm);
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.nav-link:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.nav-link.active {
-  color: #ffffff;
-  background: var(--vertiv-red);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(208, 2, 27, 0.4);
-}
-
-/* ─── LAYOUT ──────────────────────────────────────── */
-.page-header {
-  background: var(--vertiv-white);
-  border-bottom: 1px solid var(--vertiv-border);
-  padding: 20px 36px 18px;
-}
-
-.page-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--slate-900);
-  letter-spacing: -0.2px;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: var(--slate-500);
-  margin-top: 3px;
-  font-weight: 400;
-}
-
-.container {
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 24px 20px;
-  flex: 1;
-  width: 100%;
-}
-
-/* ─── STEP TRACKER ─────────────────────────────────── */
-.steps-track {
-  display: flex;
-  margin-bottom: 20px;
-  background: var(--vertiv-white);
-  border: 1px solid var(--vertiv-border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow-xs);
-}
-
-.step-item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  border-right: 1px solid var(--vertiv-border);
-  background: var(--vertiv-white);
-  transition: background 0.15s ease;
-}
-
-.step-item:last-child {
-  border-right: none;
-}
-
-.step-item.active {
-  background: var(--slate-50);
-}
-
-.step-num {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--slate-200);
-  color: var(--slate-600);
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.step-item.active .step-num {
-  background: var(--vertiv-red);
-  color: #ffffff;
-}
-
-.step-item.done .step-num {
-  background: var(--vertiv-success-text);
-  color: #ffffff;
-}
-
-.step-label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--slate-500);
-}
-
-.step-item.active .step-label {
-  color: var(--slate-900);
-}
-
-/* ─── CARDS ────────────────────────────────────────── */
-.card {
-  background: var(--vertiv-white);
-  border: 1px solid var(--vertiv-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 16px;
-}
-
-.card-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--slate-100);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.card-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--slate-900);
-  letter-spacing: -0.1px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-body {
-  padding: 20px;
-}
-
-/* ─── GRID ─────────────────────────────────────────── */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 768px) {
-  .grid-2, .grid-3 {
-    grid-template-columns: 1fr;
-  }
-  .navbar {
-    height: auto;
-    padding: 12px 16px;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .navbar-brand {
-    gap: 12px;
-  }
-  .brand-logo {
-    height: 24px;
-  }
-  .navbar-nav {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    gap: 4px;
-    padding: 0;
-  }
-  .nav-link {
-    flex: 1;
-    text-align: center;
-    justify-content: center;
-    padding: 7px 6px;
-    font-size: 11.5px;
-  }
-  .page-header {
-    padding: 14px 16px;
-  }
-  .page-title {
-    font-size: 16px;
-  }
-  .container {
-    padding: 14px 12px;
-  }
-  .steps-track {
-    flex-direction: column;
-  }
-  .step-item {
-    border-right: none;
-    border-bottom: 1px solid var(--vertiv-border);
-    padding: 10px 14px;
-  }
-  .card-header {
-    padding: 12px 14px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .card-body {
-    padding: 14px;
-  }
-  .form-control, .form-select {
-    font-size: 16px !important; /* Previene auto-zoom molesto en Safari iOS */
-    padding: 9px 12px;
-  }
-  .btn {
-    min-height: 40px;
-  }
-  .btn-xs, .btn-sm {
-    min-height: 30px;
-  }
-  .form-actions {
-    flex-direction: column-reverse;
-    gap: 8px;
-  }
-  .form-actions .btn {
-    width: 100%;
-  }
-  .sig-canvas {
-    height: 130px;
-  }
-  .scanner-controls {
-    justify-content: center;
-  }
-  .scanner-controls .close-scan-btn {
-    margin-left: 0;
-    width: 100%;
-    margin-top: 6px;
-    text-align: center;
-  }
-}
-
-/* ─── SCANNER MOBILE FIXES ─────────────────────────── */
-#reader, #readerDevolucion, #readerLocalizador, #readerGafete, #readerGafeteDev {
-  width: 100% !important;
-  border: none !important;
-}
-#reader video, #readerDevolucion video, #readerLocalizador video, #readerGafete video, #readerGafeteDev video {
-  width: 100% !important;
-  height: auto !important;
-  border-radius: var(--radius-sm);
-  display: block;
-}
-
-/* ─── FORMS ────────────────────────────────────────── */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--slate-600);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-.form-control, .form-select {
-  width: 100%;
-  padding: 8px 12px;
-  font-size: 13.5px;
-  font-family: var(--font);
-  border: 1px solid var(--slate-300);
-  border-radius: var(--radius-sm);
-  background: #ffffff;
-  color: var(--slate-900);
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.form-control:focus, .form-select:focus {
-  border-color: var(--vertiv-red);
-  box-shadow: 0 0 0 3px rgba(208, 2, 27, 0.12);
-}
-
-.form-control::placeholder {
-  color: var(--slate-400);
-}
-
-textarea.form-control {
-  resize: vertical;
-  min-height: 72px;
-}
-
-/* ─── BUTTONS ──────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font);
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-decoration: none;
-  white-space: nowrap;
-  line-height: 1.4;
-}
-
-.btn-primary {
-  background: var(--vertiv-red);
-  color: #ffffff;
-  border-color: var(--vertiv-red);
-}
-.btn-primary:hover {
-  background: var(--vertiv-red-dark);
-  border-color: var(--vertiv-red-dark);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-dark {
-  background: var(--slate-900);
-  color: #ffffff;
-  border-color: var(--slate-900);
-}
-.btn-dark:hover {
-  background: #020617;
-  border-color: #020617;
-}
-
-.btn-outline {
-  background: #ffffff;
-  border-color: var(--slate-300);
-  color: var(--slate-700);
-}
-.btn-outline:hover {
-  background: var(--slate-50);
-  border-color: var(--slate-400);
-  color: var(--slate-900);
-}
-
-.btn-success {
-  background: #059669;
-  color: #ffffff;
-  border-color: #059669;
-}
-.btn-success:hover {
-  background: #047857;
-  border-color: #047857;
-}
-
-.btn-ghost {
-  background: transparent;
-  border-color: transparent;
-  color: var(--slate-600);
-  padding: 6px 10px;
-}
-.btn-ghost:hover {
-  background: var(--slate-100);
-  color: var(--slate-900);
-}
-
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 12px;
-}
-.btn-xs {
-  padding: 3px 8px;
-  font-size: 11px;
-}
-
-/* ─── SCANNER ──────────────────────────────────────── */
-.scanner-wrapper {
-  background: #0a0a0a;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid #2a2a2a;
-}
-
-.scanner-tip {
-  background: #111111;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border-bottom: 1px solid #222222;
-}
-
-.scanner-video-area {
-  position: relative;
-}
-
-.laser-line {
-  position: absolute;
-  top: 50%;
-  left: 8%;
-  right: 8%;
-  height: 1.5px;
-  background: linear-gradient(90deg, transparent, rgba(255,40,40,0.95) 20%, rgba(255,40,40,0.95) 80%, transparent);
-  box-shadow: 0 0 8px rgba(255,40,40,0.8);
-  z-index: 10;
-  pointer-events: none;
-  animation: scan-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes scan-pulse {
-  0%, 100% { opacity: 0.95; }
-  50% { opacity: 0.35; }
-}
-
-.scanner-controls {
-  background: #111111;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  border-top: 1px solid #222222;
-}
-
-.scanner-controls-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-right: 2px;
-}
-
-.zoom-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: all 0.15s;
-}
-.zoom-btn:hover, .zoom-btn.active {
-  background: var(--vertiv-red);
-  border-color: var(--vertiv-red);
-  color: #ffffff;
-}
-
-.torch-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: var(--font);
-  display: none;
-  transition: all 0.15s;
-}
-.torch-btn.on {
-  background: #f59e0b;
-  border-color: #f59e0b;
-  color: #000000;
-}
-
-.close-scan-btn {
-  margin-left: auto;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: all 0.15s;
-}
-.close-scan-btn:hover {
-  background: var(--vertiv-red);
-  border-color: var(--vertiv-red);
-  color: #ffffff;
-}
-
-/* ─── ACTION BAR ───────────────────────────────────── */
-.action-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 12px 0 0;
-}
-
-.input-group {
-  display: flex;
-  gap: 0;
-}
-
-.input-group .form-control {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-  flex: 1;
-}
-
-.input-group .btn {
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  border-left: none;
-}
-
-/* ─── TABLE ────────────────────────────────────────── */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--vertiv-border);
-  border-radius: var(--radius-sm);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.table thead {
-  background: var(--slate-50);
-}
-
-.table th {
-  padding: 10px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--slate-500);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--vertiv-border);
-  white-space: nowrap;
-  text-align: left;
-}
-
-.table td {
-  padding: 11px 14px;
-  border-bottom: 1px solid var(--slate-100);
-  vertical-align: middle;
-  color: var(--slate-800);
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-.table tbody tr:hover td {
-  background: var(--slate-50);
-}
-.table tbody tr.row-returned td {
-  background: #f0fdf4;
-}
-
-.table-empty {
-  text-align: center;
-  padding: 36px 0 !important;
-  color: var(--slate-500) !important;
-  font-style: italic;
-}
-
-/* ─── BADGES ───────────────────────────────────────── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 4px;
-  letter-spacing: 0.2px;
-  white-space: nowrap;
-}
-
-.badge-success {
-  background: var(--vertiv-success-bg);
-  color: var(--vertiv-success-text);
-  border: 1px solid var(--vertiv-success-border);
-}
-.badge-warning {
-  background: var(--vertiv-warning-bg);
-  color: var(--vertiv-warning-text);
-  border: 1px solid var(--vertiv-warning-border);
-}
-.badge-info {
-  background: var(--vertiv-info-bg);
-  color: var(--vertiv-info-text);
-  border: 1px solid var(--vertiv-info-border);
-}
-.badge-danger {
-  background: var(--vertiv-danger-bg);
-  color: var(--vertiv-danger-text);
-  border: 1px solid var(--vertiv-danger-border);
-}
-.badge-gray {
-  background: var(--slate-100);
-  color: var(--slate-700);
-  border: 1px solid var(--slate-200);
-}
-
-/* ─── SIGNATURE ────────────────────────────────────── */
-.sig-box {
-  border: 1px solid var(--vertiv-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  background: #ffffff;
-}
-
-.sig-canvas {
-  display: block;
-  width: 100%;
-  height: 120px;
-  cursor: crosshair;
-  touch-action: none;
-}
-
-.sig-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 12px;
-  background: var(--slate-50);
-  border-top: 1px solid var(--vertiv-border);
-  font-size: 11px;
-  color: var(--slate-500);
-}
-
-/* ─── ALERTS ───────────────────────────────────────── */
-.alert {
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  border: 1px solid;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
-
-.alert-success {
-  background: var(--vertiv-success-bg);
-  color: var(--vertiv-success-text);
-  border-color: var(--vertiv-success-border);
-}
-.alert-info {
-  background: var(--vertiv-info-bg);
-  color: var(--vertiv-info-text);
-  border-color: var(--vertiv-info-border);
-}
-.alert-warning {
-  background: var(--vertiv-warning-bg);
-  color: var(--vertiv-warning-text);
-  border-color: var(--vertiv-warning-border);
-}
-
-/* ─── SECTION DIVIDER ──────────────────────────────── */
-.section-divider {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--slate-500);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  padding: 8px 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.section-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--vertiv-border);
-}
-
-/* ─── EMPLOYEE SUMMARY ─────────────────────────────── */
-.employee-card {
-  background: var(--slate-50);
-  border: 1px solid var(--vertiv-border);
-  border-radius: var(--radius-sm);
-  padding: 16px 18px;
-  margin-top: 14px;
-}
-
-.employee-card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-@media (max-width: 640px) {
-  .employee-card-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.employee-field-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--slate-500);
-  margin-bottom: 2px;
-}
-
-.employee-field-value {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--slate-900);
-}
-
-/* ─── FOOTER ───────────────────────────────────────── */
-.footer {
-  background: var(--vertiv-white);
-  border-top: 1px solid var(--vertiv-border);
-  padding: 16px 24px;
-  text-align: center;
-  font-size: 11.5px;
-  color: var(--slate-500);
-  margin-top: auto;
-}
-
-.footer strong {
-  color: var(--slate-700);
-}
-
-/* ─── FORM ACTIONS ─────────────────────────────────── */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  padding-top: 16px;
-  border-top: 1px solid var(--slate-100);
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-/* ─── PRINT STYLES ─────────────────────────────────── */
-@media print {
-  .navbar, .btn, .scanner-wrapper, .action-bar, .sig-footer, .no-print, .steps-track {
-    display: none !important;
-  }
-  body {
-    background: #ffffff;
-  }
-  .card {
-    box-shadow: none;
-    border: 1px solid #cccccc;
-  }
-}
-
-/* ─── USER SESSION NAV ─────────────────────────────── */
-.user-nav-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-left: 12px;
-  border-left: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.user-nav-info {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.user-nav-name {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #ffffff;
-  line-height: 1.2;
-}
-
-.user-nav-role {
-  font-size: 10px;
-  color: var(--slate-400);
-}
-
-.btn-logout {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #cbd5e1;
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.15s;
-  font-family: var(--font);
-}
-
-.btn-logout:hover {
-  background: var(--vertiv-red);
-  border-color: var(--vertiv-red);
-  color: #ffffff;
-}
-
-@media (max-width: 768px) {
-  .user-nav-box {
-    width: 100%;
-    justify-content: space-between;
-    border-left: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 8px 4px 0;
-    margin-top: 2px;
-  }
-  .user-nav-info {
-    text-align: left;
-  }
-}
-
-</style>
+  <link rel="stylesheet" href="styles.css?v=2">
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
@@ -1379,12 +408,29 @@ textarea.form-control {
 
 const DB_KEY_ASIGNACIONES = 'VERTIV_ASIGNACIONES_V1';
 const DB_KEY_COLABORADORES = 'VERTIV_COLABORADORES_V1';
+const DB_VERSION_KEY = 'VERTIV_DB_VERSION';
+const DB_VERSION_ACTUAL = '2026-10-29-v2';
+
+// Limpia datos antiguos si la versión del demo cambió
+function verificarVersionDB() {
+  const versionGuardada = localStorage.getItem(DB_VERSION_KEY);
+  if (versionGuardada !== DB_VERSION_ACTUAL) {
+    localStorage.removeItem(DB_KEY_ASIGNACIONES);
+    localStorage.removeItem(DB_KEY_COLABORADORES);
+    localStorage.setItem(DB_VERSION_KEY, DB_VERSION_ACTUAL);
+  }
+}
 
 // Datos predeterminados de prueba para Vertiv Mexicali
 const DATOS_INICIALES_COLABORADORES = [
-  { id: 'V-1042', nombre: 'Carlos Mendoza Ruiz', depto: 'Ingeniería de Planta / UPS', puesto: 'Técnico de Campo' },
-  { id: 'V-1088', nombre: 'Mariana López Castro', depto: 'Calidad y Pruebas', puesto: 'Inspectora QA' },
-  { id: 'V-2015', nombre: 'Alejandro Valenzuela', depto: 'Mantenimiento e Instalaciones', puesto: 'Especialista Eléctrico' }
+  { id: 'V-1042', nombre: 'Carlos Mendoza Ruiz',    depto: 'Ingeniería de Planta / UPS',       puesto: 'Técnico de Campo' },
+  { id: 'V-1088', nombre: 'Mariana López Castro',   depto: 'Calidad y Pruebas',                 puesto: 'Inspectora QA' },
+  { id: 'V-2015', nombre: 'Alejandro Valenzuela',   depto: 'Mantenimiento e Instalaciones',     puesto: 'Especialista Eléctrico' },
+  { id: 'V-1101', nombre: 'Jorge Ibarra Soto',      depto: 'Producción / Ensamble',             puesto: 'Técnico de Producción' },
+  { id: 'V-1155', nombre: 'Patricia Ramos Vega',    depto: 'Logística y Almacén',               puesto: 'Coordinadora de Almacén' },
+  { id: 'V-2033', nombre: 'Ricardo Fuentes Mora',   depto: 'Ingeniería de Procesos',            puesto: 'Ingeniero de Procesos Sr.' },
+  { id: 'V-0987', nombre: 'Ana Lucía Herrera',      depto: 'Recursos Humanos',                  puesto: 'Especialista RRHH' },
+  { id: 'V-3001', nombre: 'Daniel Soto Espinoza',   depto: 'Seguridad Industrial',              puesto: 'Inspector de Seguridad' }
 ];
 
 const DATOS_INICIALES_ASIGNACIONES = [
@@ -1393,20 +439,114 @@ const DATOS_INICIALES_ASIGNACIONES = [
     empleadoId: 'V-1042',
     empleadoNombre: 'Carlos Mendoza Ruiz',
     depto: 'Ingeniería de Planta / UPS',
-    fechaEntrega: '2026-10-15',
+    fechaEntrega: '2026-10-01',
     estado: 'ACTIVO',
     equipos: [
-      { codigo: 'VERTIV-LAP-042', categoria: 'Laptop', descripcion: 'Dell Latitude 5430 Core i7', serie: '8FG9X23', devuelto: false, foto: null },
-      { codigo: 'VERTIV-CHG-042', categoria: 'Cargador', descripcion: 'Cargador Dell USB-C 65W Original', serie: 'CN-0G6J41', devuelto: false, foto: null },
-      { codigo: 'VERTIV-RAD-015', categoria: 'Radio Comunicación', descripcion: 'Radio Motorola DGP8550e con clip', serie: '782TXA091', devuelto: false, foto: null },
-      { codigo: 'VERTIV-FLK-108', categoria: 'Equipo de Medición', descripcion: 'Multímetro Industrial Fluke 87V', serie: 'FK-9871234', devuelto: false, foto: null }
+      { codigo: 'VERTIV-LAP-042', categoria: 'Laptop',              descripcion: 'Dell Latitude 5430 Core i7',          serie: '8FG9X23',    devuelto: false, foto: null },
+      { codigo: 'VERTIV-CHG-042', categoria: 'Cargador',            descripcion: 'Cargador Dell USB-C 65W Original',    serie: 'CN-0G6J41',  devuelto: false, foto: null },
+      { codigo: 'VERTIV-RAD-015', categoria: 'Radio Comunicación',  descripcion: 'Radio Motorola DGP8550e con clip',    serie: '782TXA091',  devuelto: false, foto: null },
+      { codigo: 'VERTIV-FLK-108', categoria: 'Equipo de Medición',  descripcion: 'Multímetro Industrial Fluke 87V',     serie: 'FK-9871234', devuelto: false, foto: null }
     ],
-    fotoEntrega: null,
-    firmaEntrega: null,
-    fechaDevolucion: null,
-    fotoDevolucion: null,
-    firmaDevolucion: null,
-    comentariosDevolucion: ''
+    fotoEntrega: null, firmaEntrega: null, fechaDevolucion: null,
+    fotoDevolucion: null, firmaDevolucion: null, comentariosDevolucion: ''
+  },
+  {
+    folio: 'RESP-2026-002',
+    empleadoId: 'V-1088',
+    empleadoNombre: 'Mariana López Castro',
+    depto: 'Calidad y Pruebas',
+    fechaEntrega: '2026-10-05',
+    estado: 'ACTIVO',
+    equipos: [
+      { codigo: 'VERTIV-LAP-088', categoria: 'Laptop',              descripcion: 'HP EliteBook 840 G9 Core i5',         serie: 'CND2350KTF', devuelto: false, foto: null },
+      { codigo: 'VERTIV-MON-088', categoria: 'Monitor',             descripcion: 'Monitor Dell 24" P2422H Full HD',      serie: 'CN-0483MX',  devuelto: false, foto: null },
+      { codigo: 'VERTIV-FLK-201', categoria: 'Equipo de Medición',  descripcion: 'Multímetro Fluke 115 True RMS',       serie: 'FK-1150088', devuelto: false, foto: null }
+    ],
+    fotoEntrega: null, firmaEntrega: null, fechaDevolucion: null,
+    fotoDevolucion: null, firmaDevolucion: null, comentariosDevolucion: ''
+  },
+  {
+    folio: 'RESP-2026-003',
+    empleadoId: 'V-2015',
+    empleadoNombre: 'Alejandro Valenzuela',
+    depto: 'Mantenimiento e Instalaciones',
+    fechaEntrega: '2026-09-20',
+    estado: 'DEVUELTO_PARCIAL',
+    equipos: [
+      { codigo: 'VERTIV-HRR-031', categoria: 'Herramienta Especializada', descripcion: 'Taladro Bosch GSB 18V-55',       serie: 'B18V-031',   devuelto: true,  foto: null },
+      { codigo: 'VERTIV-HRR-032', categoria: 'Herramienta Especializada', descripcion: 'Juego de llaves torx Wiha 30pc', serie: 'WH-T30-032', devuelto: true,  foto: null },
+      { codigo: 'VERTIV-FLK-099', categoria: 'Equipo de Medición',        descripcion: 'Pinza Amperimétrica Fluke 376',  serie: 'FK-3760099', devuelto: false, foto: null },
+      { codigo: 'VERTIV-RAD-031', categoria: 'Radio Comunicación',         descripcion: 'Radio Motorola DP1400 UHF',      serie: '750RTX310',  devuelto: false, foto: null },
+      { codigo: 'VERTIV-LAP-031', categoria: 'Laptop',                    descripcion: 'Lenovo ThinkPad L14 Core i5',    serie: 'MP2BDKTR',   devuelto: true,  foto: null }
+    ],
+    fotoEntrega: null, firmaEntrega: null,
+    fechaDevolucion: '2026-10-18T09:30:00.000Z',
+    fotoDevolucion: null, firmaDevolucion: null,
+    comentariosDevolucion: 'Devolución parcial — pendientes radio y pinza en uso para mantenimiento preventivo programado.'
+  },
+  {
+    folio: 'RESP-2026-004',
+    empleadoId: 'V-1101',
+    empleadoNombre: 'Jorge Ibarra Soto',
+    depto: 'Producción / Ensamble',
+    fechaEntrega: '2026-10-10',
+    estado: 'ACTIVO',
+    equipos: [
+      { codigo: 'VERTIV-HRR-110', categoria: 'Herramienta Especializada', descripcion: 'Torquímetro digital CDI 1/4"',    serie: 'CDI-110-JIS', devuelto: false, foto: null },
+      { codigo: 'VERTIV-HRR-111', categoria: 'Herramienta Especializada', descripcion: 'Desarmador de impacto inalámbrico', serie: 'BOW-411',   devuelto: false, foto: null },
+      { codigo: 'VERTIV-CEL-110', categoria: 'Celular Corporativo',        descripcion: 'Samsung Galaxy A34 5G',           serie: 'R58T7BGWK11', devuelto: false, foto: null }
+    ],
+    fotoEntrega: null, firmaEntrega: null, fechaDevolucion: null,
+    fotoDevolucion: null, firmaDevolucion: null, comentariosDevolucion: ''
+  },
+  {
+    folio: 'RESP-2026-005',
+    empleadoId: 'V-1155',
+    empleadoNombre: 'Patricia Ramos Vega',
+    depto: 'Logística y Almacén',
+    fechaEntrega: '2026-10-12',
+    estado: 'ACTIVO',
+    equipos: [
+      { codigo: 'VERTIV-CEL-155', categoria: 'Celular Corporativo',  descripcion: 'iPhone 14 128GB Space Gray',       serie: 'F2LXM9KWLN', devuelto: false, foto: null },
+      { codigo: 'VERTIV-TAB-155', categoria: 'Tablet',               descripcion: 'iPad 10a Gen Wi-Fi 64GB',          serie: 'DMQRY14MPV', devuelto: false, foto: null },
+      { codigo: 'VERTIV-RAD-055', categoria: 'Radio Comunicación',   descripcion: 'Radio Kenwood TK-3402U16P',        serie: 'B3M025055',  devuelto: false, foto: null }
+    ],
+    fotoEntrega: null, firmaEntrega: null, fechaDevolucion: null,
+    fotoDevolucion: null, firmaDevolucion: null, comentariosDevolucion: ''
+  },
+  {
+    folio: 'RESP-2026-006',
+    empleadoId: 'V-2033',
+    empleadoNombre: 'Ricardo Fuentes Mora',
+    depto: 'Ingeniería de Procesos',
+    fechaEntrega: '2026-09-10',
+    estado: 'DEVUELTO_TOTAL',
+    equipos: [
+      { codigo: 'VERTIV-LAP-033', categoria: 'Laptop',              descripcion: 'Dell XPS 15 9530 Core i9',         serie: 'HGNW4X3',    devuelto: true, foto: null },
+      { codigo: 'VERTIV-CHG-033', categoria: 'Cargador',            descripcion: 'Cargador Dell 130W USB-C',         serie: 'CN-0GN742',  devuelto: true, foto: null },
+      { codigo: 'VERTIV-FLK-333', categoria: 'Equipo de Medición',  descripcion: 'Analizador de potencia Fluke 435-II', serie: 'FK-435333', devuelto: true, foto: null },
+      { codigo: 'VERTIV-RAD-033', categoria: 'Radio Comunicación',  descripcion: 'Radio Motorola DGP5550e',          serie: '801RFX033',  devuelto: true, foto: null }
+    ],
+    fotoEntrega: null, firmaEntrega: null,
+    fechaDevolucion: '2026-10-22T14:05:00.000Z',
+    fotoDevolucion: null, firmaDevolucion: null,
+    comentariosDevolucion: 'Proyecto Q3 finalizado. Todos los equipos devueltos en buen estado. Sin observaciones.'
+  },
+  {
+    folio: 'RESP-2026-007',
+    empleadoId: 'V-3001',
+    empleadoNombre: 'Daniel Soto Espinoza',
+    depto: 'Seguridad Industrial',
+    fechaEntrega: '2026-10-20',
+    estado: 'ACTIVO',
+    equipos: [
+      { codigo: 'VERTIV-RAD-301', categoria: 'Radio Comunicación',       descripcion: 'Radio ICOM IC-F4003 UHF',           serie: '0300301ICF', devuelto: false, foto: null },
+      { codigo: 'VERTIV-SEC-301', categoria: 'Equipo de Seguridad',      descripcion: 'Linterna táctica Streamlight ProTac', serie: 'SL-301TKP', devuelto: false, foto: null },
+      { codigo: 'VERTIV-SEC-302', categoria: 'Equipo de Seguridad',      descripcion: 'Detector de gas portátil MSA Altair', serie: 'MSAL-0302', devuelto: false, foto: null },
+      { codigo: 'VERTIV-CEL-301', categoria: 'Celular Corporativo',       descripcion: 'Samsung Galaxy XCover 6 Pro',         serie: 'R59A2LBKG30', devuelto: false, foto: null }
+    ],
+    fotoEntrega: null, firmaEntrega: null, fechaDevolucion: null,
+    fotoDevolucion: null, firmaDevolucion: null, comentariosDevolucion: ''
   }
 ];
 
@@ -1447,6 +587,7 @@ function consolidarAsignacionesDuplicadas() {
 }
 
 function inicializarDB() {
+  verificarVersionDB();
   if (!localStorage.getItem(DB_KEY_COLABORADORES)) {
     localStorage.setItem(DB_KEY_COLABORADORES, JSON.stringify(DATOS_INICIALES_COLABORADORES));
   }
